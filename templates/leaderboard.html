@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Leaderboard - {{ task.name }} - {{ task.course.code }} - {{ block.super }}
+{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item"><a href="{% url 'courses' %}">Courses</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'course' task.course.pk %}">{{ task.course.code }}</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'submissions' task.course.pk task.pk %}">{{ task.name }}</a></li>
+  <li class="breadcrumb-item active">Leaderboard</li>
+{% endblock %}
+
+{% block content %}
+  <h1>Leaderboard</h1>
+  <br>
+
+  <div class="table-responsive">
+    <table class="table">
+      <thead class="thead-inverse">
+        <tr>
+          <th>Rank</th>
+          <th>Username</th>
+          <th>Verdict</th>
+          <th>Point</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for submission in submissions.all %}
+          <tr>
+            <td class="align-middle">{{ forloop.counter }}</td>
+            <td class="align-middle">{{ submission.user }}</td>
+            <td class="align-middle">{{ submission.get_verdict_display }}</td>
+            <td class="align-middle">{{ submission.point }}</td>
+            <td class="align-middle">{{ submission.created_at }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

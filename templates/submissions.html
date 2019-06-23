@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% load fontawesome_5 %}
+{% load submission_is_allowed %}
+{% load can %}
+{% load define %}
+
+{% block title %}
+  {{ task.name }} - {{ task.course.code }} - {{ block.super }}
+{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item"><a href="{% url 'courses' %}">Courses</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'course' task.course.pk %}">{{ task.course.code }}</a></li>
+  <li class="breadcrumb-item active">{{ task.name }}</li>
+{% endblock %}
+
+{% block content %}
+
+  {% submission_is_allowed task request.user as submission_allowed %}
+  {% can task.course request.user 'task.submit' as can_submit %}
+
+  {% if submission_allowed and can_submit and task.is_open %}
+    {% define "btn-primary" as button_decorator %}
+  {% else %}
+    {% define "btn-secondary" as button_decorator %}
+  {% endif %}
+
+  <h1>{{ task.name }}</h1>
+  <span>{{ task.description }}</span><hr>
+
+  <div class="mb-4">
+    <a href="{% url 'submission_new' task.course.pk task.pk %}" class='btn {{ button_decorator }}'>{% fa5_icon 'plus-circle' 'fas' %} New submission</a>
+    {% if task.leaderboard %}
+      <a href="{% url 'leaderboard' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'crown' 'fas' %} Leaderboard</a>
+    {% endif %}
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead class="thead-inverse">
+        <tr>
+          <th>Submission</th>
+          <th>Description</th>
+          <th>Verdict</th>
+          <th>Point</th>
+          <th>Notes</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for submission in submissions.all %}
+          <tr>
+            <td class="align-middle">
+              <div class="row">
+                {% if submission.file %}
+                <div class="col-1">{% fa5_icon 'file' 'fas' %}</div>
+                <div class="col-8" style="overflow-wrap: break-word">{{ submission.filename }}</div>
+                {% elif submission.metadata %}
+                <div class="col-1">{% fa5_icon 'stream' 'fas' %}</div>
+                <div class="col-8">{{ submission.metadata }}</div>
+                {% else %}
+                <div class="col-9">None</div>
+                {% endif %}
+                <div class="col-1">
+                  {% if submission.runner == 'PY' %}
+                    {% fa5_icon 'python' 'fab' %}
+                  {% elif submission.runner == 'DO' %}
+                    {% fa5_icon 'docker' 'fab' %}
+                  {% else %}
+                    {{ submission.runner }}
+                  {% endif %}
+                </div>
+                <div class="col-1">
+                  {% if submission.status == 'Q' %}
+                    {% fa5_icon 'clock' 'fas' %}
+                  {% elif submission.status == 'R' %}
+                    {% fa5_icon 'cogs' 'fas' %}
+                  {% elif submission.status == 'D' %}
+                    {% fa5_icon 'check-circle' 'fas' %}
+                  {% elif submission.status == 'E' %}
+                    {% fa5_icon 'times-circle' 'fas' %}
+                  {% else %}
+                    {{ submission.status }}
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+            <td class="align-middle">{{ submission.description }}</td>
+            <td class="align-middle">{{ submission.get_verdict_display }}</td>
+            <td class="align-middle">{{ submission.point }}</td>
+            <td class="align-middle">{{ submission.notes }}</td>
+            <td class="align-middle">{{ submission.created_at }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

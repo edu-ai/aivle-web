@@ -1,0 +1,6 @@
+Django
+django-crispy-forms
+django-bootstrap-datepicker-plus
+django-bootstrap4
+django-fontawesome-5
+cachetools
