@@ -29,7 +29,7 @@ pip install -r requirements.txt
 Migrate and create the superuser
 ```
 python manage.py makemigrations
-python manage.py sqlmigrate boards 0001
+python manage.py sqlmigrate app 0001
 python manage.py migrate
 python manage.py createsuperuser
 ```
