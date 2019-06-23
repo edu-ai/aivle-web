@@ -4,12 +4,10 @@ A platform for lecturers to provide students with an environment to run and grad
 
 ## Screenshots
 
-![Courses](/assets/courses.png?raw=true "Courses")
-![Tasks](/assets/tasks.png?raw=true "Tasks")
-![Task Edit](/assets/task_edit.jpg?raw=true "Task Edit")
-![Submissions](/assets/submissions.png?raw=true "Submissions")
-![Submission](/assets/submission.png?raw=true "Submission")
-![Leaderboard](/assets/leaderboard.png?raw=true "Leaderboard")
+| ![Courses](/assets/courses.png?raw=true "Courses") | ![Tasks](/assets/tasks.png?raw=true "Tasks") | 
+|:-------------------------:|:-------------------------:|
+| ![Task Edit](/assets/task_edit.png?raw=true "Task Edit") | ![Submissions](/assets/submissions.png?raw=true "Submissions") 
+| ![Submission](/assets/submission.png?raw=true "Submission") | ![Leaderboard](/assets/leaderboard.png?raw=true "Leaderboard") |
 
 ## Status
 
