@@ -38,3 +38,13 @@ Run server
 ```
 python manage.py runserver
 ```
+
+## API
+
+Set of API for the runner
+```
+/api/v1/jobs/ 			[GET]
+/api/v1/jobs/1/			[GET]
+/api/v1/jobs/1/run/ 	[POST]
+/api/v1/jobs/1/end/		[POST]
+```

@@ -37,9 +37,7 @@ urlpatterns = [
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/leaderboard/$', views.leaderboard, name='leaderboard'),
 
 
-    url(r'^api/v1/jobs/$', apis.jobs, name='jobs'),
-    url(r'^api/v1/jobs/(?P<submission_pk>\d+)/run/$', apis.job_run, name='job_run'),
-    url(r'^api/v1/jobs/(?P<submission_pk>\d+)/end/$', apis.job_end, name='job_done'),
+    path('api/v1/', include(apis.router.urls)),
 
 
     path('admin/', admin.site.urls),

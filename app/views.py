@@ -121,7 +121,7 @@ def submissions(request, course_pk, task_pk):
         messages.error(request, 'You are not allowed to view this task submissions.')
         return redirect(redirect_url)
 
-    submissions = task.submissions.filter(user=request.user)
+    submissions = task.submissions.filter(user=request.user).order_by('-created_at')
 
     return render(request, 'submissions.html', {'task': task, 'submissions': submissions})
 

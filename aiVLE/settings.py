@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "bootstrap4",
     'bootstrap_datepicker_plus',
     'fontawesome_5',
+    'rest_framework',
     'app',
 ]
 
@@ -176,6 +177,14 @@ ROLES = {
 # Upload
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
+
+# Django Rest Framework
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+    'PAGE_SIZE': 10
+}
 
 # Luminus OAuth
 

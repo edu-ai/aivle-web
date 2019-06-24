@@ -4,3 +4,4 @@ django-bootstrap-datepicker-plus
 django-bootstrap4
 django-fontawesome-5
 cachetools
+djangorestframework
