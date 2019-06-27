@@ -2,10 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models.aggregates import Max
+from django.http import HttpResponse
 
 from .models import Course, Task, Submission, Participation
 from .forms import TaskForm, SubmissionForm, CourseForm
 from .funcs import can, submission_is_allowed, course_participations, course_participation
+
+import os
 
 
 @login_required
@@ -91,7 +94,7 @@ def task_edit(request, course_pk, task_pk=None):
     else:
         task = Task(course=course)
 
-    form = TaskForm(request.POST or None, instance=task)
+    form = TaskForm(request.POST or None, request.FILES or None, instance=task)
     if request.POST and form.is_valid():
         form.save()
 
@@ -111,6 +114,21 @@ def task_delete(request, course_pk, task_pk):
 
     redirect_url = reverse('course', args=(course_pk,))
     return redirect(redirect_url)
+
+# TODO: enable basic auth
+def task_download(request, pk):
+    task = get_object_or_404(Task, pk=pk)
+    redirect_url = reverse('course', args=(task.course.pk,))
+
+    # if not can(task.course, request.user, 'task.download'):
+    #     messages.error(request, 'You are not allowed to download this task.')
+    #     return redirect(redirect_url)
+
+    filename = os.path.basename(task.file.name)
+    response = HttpResponse(task.file, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+
+    return response
 
 @login_required
 def submissions(request, course_pk, task_pk):
@@ -138,9 +156,16 @@ def leaderboard(request, course_pk, task_pk):
                                 .order_by('-max_point') \
                                 .values('max_point')
 
-    submissions = task.submissions.order_by('-point').filter(point__in=user_maxpoints)
+    submissions = task.submissions.order_by('-point').filter(point__in=user_maxpoints).all()
 
-    return render(request, 'leaderboard.html', {'task': task, 'submissions': submissions})
+    # Hack: otherwise will output multiple same user if got the same point on multiple submissions
+    leaderboard_list, users = [], {}
+    for s in submissions:
+        if s.user.id not in users:
+            users[s.user.id] = True
+            leaderboard_list.append(s)
+
+    return render(request, 'leaderboard.html', {'task': task, 'submissions': leaderboard_list})
 
 @login_required
 def submission_new(request, course_pk, task_pk):
@@ -166,3 +191,18 @@ def submission_new(request, course_pk, task_pk):
         return redirect(redirect_url)
 
     return render(request, 'submission_new.html', {'form': form})
+
+# TODO: enable basic auth
+def submission_download(request, pk):
+    submission = get_object_or_404(Submission, pk=pk)
+    redirect_url = reverse('submissions', args=(submission.task.course.pk,submission.task.pk))
+
+    # if not can(submission.task.course, request.user, 'submission.download'):
+    #     messages.error(request, 'You are not allowed to download this submission.')
+    #     return redirect(redirect_url)
+
+    filename = os.path.basename(submission.file.name)
+    response = HttpResponse(submission.file, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+
+    return response

@@ -4,6 +4,17 @@
 {% load submission_is_allowed %}
 {% load can %}
 {% load define %}
+{% load prettyjson %}
+
+{% block extrahead %}
+  {% prettyjson_setup %}
+
+  <style type="text/css">
+    .jsonwidget > p {
+      display: none;
+    }
+  </style>
+{% endblock %}
 
 {% block title %}
   {{ task.name }} - {{ task.course.code }} - {{ block.super }}
@@ -41,9 +52,8 @@
         <tr>
           <th>Submission</th>
           <th>Description</th>
-          <th>Verdict</th>
           <th>Point</th>
-          <th>Notes</th>
+          <th>Evaluations</th>
           <th>Created At</th>
         </tr>
       </thead>
@@ -72,13 +82,13 @@
                 </div>
                 <div class="col-1">
                   {% if submission.status == 'Q' %}
-                    {% fa5_icon 'clock' 'fas' %}
+                    {% fa5_icon 'clock' 'fas' color='DodgerBlue' %}
                   {% elif submission.status == 'R' %}
-                    {% fa5_icon 'cogs' 'fas' %}
+                    {% fa5_icon 'cog' 'fas' color='OrangeRed' spin=True %}
                   {% elif submission.status == 'D' %}
-                    {% fa5_icon 'check-circle' 'fas' %}
+                    {% fa5_icon 'check-circle' 'fas' color='ForestGreen' %}
                   {% elif submission.status == 'E' %}
-                    {% fa5_icon 'times-circle' 'fas' %}
+                    {% fa5_icon 'times-circle' 'fas' color='red' %}
                   {% else %}
                     {{ submission.status }}
                   {% endif %}
@@ -86,13 +96,23 @@
               </div>
             </td>
             <td class="align-middle">{{ submission.description }}</td>
-            <td class="align-middle">{{ submission.get_verdict_display }}</td>
             <td class="align-middle">{{ submission.point }}</td>
-            <td class="align-middle">{{ submission.notes }}</td>
+            <td class="align-middle">
+              {% if submission.notes %}
+                {% prettyjson submission.notes initial='parsed' %}
+              {% else %}
+                {{ submission.notes }}
+              {% endif %}
+            </td>
             <td class="align-middle">{{ submission.created_at }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $(document).find('div.parsed').JSONView('collapse');
+    });
+  </script>
 {% endblock %}

@@ -1,12 +1,14 @@
-from rest_framework import status
+from rest_framework.status import HTTP_404_NOT_FOUND
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 from rest_framework import viewsets
 from rest_framework.routers import DefaultRouter
 
-from .models import Submission
-from .serializers import SubmissionSerializer
+from .models import Submission, Task
+from .serializers import SubmissionSerializer, TaskSerializer
+
+import json
 
 class JobViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Submission.objects.all()
@@ -24,7 +26,7 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
         try:
             submission = Submission.objects.get(pk=pk, status=Submission.STATUS_QUEUED)
         except Submission.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         submission.status = Submission.STATUS_RUNNING
         submission.save()
@@ -39,7 +41,7 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
         try:
             submission = Submission.objects.get(pk=pk, status=Submission.STATUS_RUNNING)
         except Submission.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         json_data = json.loads(request.body)
         status = json_data.get('status')
@@ -52,5 +54,11 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = self.get_serializer(submission)
         return Response(serializer.data)
 
+class TaskViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = (IsAdminUser,)
+
 router = DefaultRouter()
 router.register(r'jobs', JobViewSet)
+router.register(r'tasks', TaskViewSet)

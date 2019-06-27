@@ -21,17 +21,15 @@
         <tr>
           <th>Rank</th>
           <th>Username</th>
-          <th>Verdict</th>
           <th>Point</th>
           <th>Created At</th>
         </tr>
       </thead>
       <tbody>
-        {% for submission in submissions.all %}
+        {% for submission in submissions %}
           <tr>
             <td class="align-middle">{{ forloop.counter }}</td>
             <td class="align-middle">{{ submission.user }}</td>
-            <td class="align-middle">{{ submission.get_verdict_display }}</td>
             <td class="align-middle">{{ submission.point }}</td>
             <td class="align-middle">{{ submission.created_at }}</td>
           </tr>

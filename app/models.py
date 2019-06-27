@@ -2,13 +2,51 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import timedelta
 from django.utils import timezone
+from django.shortcuts import reverse
+from django.core.files.storage import default_storage
 import os
+import hashlib
 
+class ExtraFileField(models.FileField):
+    def __init__(self, verbose_name=None, name=None, upload_to='', after_file_save=None, storage=None, **kwargs):
+        self.after_file_save = after_file_save
+        super().__init__(verbose_name, name, upload_to=upload_to, storage=storage or default_storage, **kwargs)
+
+    def pre_save(self, model_instance, add):
+        file = super().pre_save(model_instance, add)
+        self.after_file_save(model_instance)
+        return file
+
+def hash_file(file, block_size=65536):
+    hasher = hashlib.md5()
+    while True:
+        data = file.read(block_size)
+        if not data:
+            break
+        hasher.update(data)
+    return hasher.hexdigest()
+
+def make_safe_filename(s):
+    def safe_char(c):
+        if c.isalnum():
+            return c
+        else:
+            return "_"
+    return "".join(safe_char(c) for c in s).rstrip("_")
 
 def submission_path(instance, filename):
-    return 'submissions/course_{}/task_{}/user_{}/{}_{}'.format(
-        instance.task.course.id, instance.task.id, instance.user.id, timezone.now().timestamp(), filename
+    return 'courses/{}/tasks/{}/submissions/{}/{}'.format(
+        instance.task.course.id, make_safe_filename(instance.task.name), instance.user.id, filename
     )
+
+def task_path(instance, filename):
+    return 'courses/{}/tasks/{}/{}'.format(
+        instance.course.id, make_safe_filename(instance.name), filename
+    )
+
+def compute_file_hash(instance):
+    with instance.file.open():
+        instance.file_hash = hash_file(instance.file)
 
 
 class Course(models.Model):
@@ -63,15 +101,16 @@ class Participation(models.Model):
 
 
 class Task(models.Model):
-    DEFAULT_RUNTIME_LIMIT = timedelta(seconds=10)
     DEFAULT_MAX_UPLOAD_SIZE = 5 * 1024 # KB
     DEFAULT_DAILY_SUBMISSIONS_LIMIT = 3
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
 
+    file = ExtraFileField(upload_to=task_path, after_file_save=compute_file_hash)
+    file_hash = models.CharField(max_length=255)
+
     daily_submission_limit = models.PositiveSmallIntegerField(default=DEFAULT_DAILY_SUBMISSIONS_LIMIT)
-    runtime_limit = models.DurationField(default=DEFAULT_RUNTIME_LIMIT)
     max_upload_size = models.IntegerField(default=DEFAULT_MAX_UPLOAD_SIZE)
 
     opened_at = models.DateTimeField(blank=True, null=True)
@@ -105,6 +144,10 @@ class Task(models.Model):
             return "Overdue"
         return "Open" if self.is_open else "Scheduled"
 
+    @property
+    def file_url(self):
+        return reverse('task_download', args=(self.course.pk,self.pk))
+
     def __str__(self):
         return "{} - {} AY{} Sem{}".format(self.name, self.course.code, self.course.academic_year, self.course.semester)
     
@@ -121,17 +164,6 @@ class Submission(models.Model):
         (STATUS_DONE, 'Done')
     ]
 
-    VERDICT_NONE = 'NA'
-    VERDICT_ACCEPTED = 'AC'
-    VERDICT_WRONG_ANSWER = 'WA'
-    VERDICT_TIME_LIMIT_EXCEEDED = 'TLE'
-    VERDICTS = [
-        (VERDICT_NONE, 'None'),
-        (VERDICT_ACCEPTED, 'Accepted'),
-        (VERDICT_WRONG_ANSWER, 'Wrong Answer'),
-        (VERDICT_TIME_LIMIT_EXCEEDED, 'Time Limit Exceeded'),
-    ]
-
     RUNNER_PYTHON = 'PY'
     RUNNER_DOCKER = 'DO'
     RUNNERS = [
@@ -142,6 +174,7 @@ class Submission(models.Model):
 
     description = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to=submission_path, blank=True, null=True)
+    docker = models.CharField(max_length=255,blank=True, null=True)
 
     runner = models.CharField(
         max_length=2,
@@ -158,11 +191,6 @@ class Submission(models.Model):
         choices=STATUSES,
         default=STATUS_QUEUED,
     )
-    verdict = models.CharField(
-        max_length=3,
-        choices=VERDICTS,
-        default=VERDICT_NONE,
-    )
     point = models.IntegerField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
 
@@ -171,6 +199,10 @@ class Submission(models.Model):
     @property
     def filename(self):
         return os.path.basename(self.file.name) if self.file else None
+
+    @property
+    def file_url(self):
+        return reverse('submission_download', args=(self.task.course.pk,self.task.pk, self.pk))
 
     def __str__(self):
         return "{}:{} - {} - {} AY{} Sem{}".format(self.user, self.pk, self.task.name, 

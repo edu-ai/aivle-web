@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'fontawesome_5',
     'rest_framework',
+    'prettyjson',
     'app',
 ]
 
@@ -154,14 +155,16 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Permissions
 
-ROLES_COURSE_ADD    = ['LEC', 'ADM']
-ROLES_COURSE_DELETE = ['LEC', 'ADM']
-ROLES_COURSE_VIEW   = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
-ROLES_COURSE_JOIN   = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
-ROLES_TASK_VIEW     = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
-ROLES_TASK_SUBMIT   = ['STU', 'TA', 'LEC', 'ADM']
-ROLES_TASK_EDIT     = ['TA', 'LEC', 'ADM']
-ROLES_TASK_DELETE   = ['LEC', 'ADM']
+ROLES_COURSE_ADD            = ['LEC', 'ADM']
+ROLES_COURSE_DELETE         = ['LEC', 'ADM']
+ROLES_COURSE_VIEW           = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
+ROLES_COURSE_JOIN           = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
+ROLES_TASK_VIEW             = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
+ROLES_TASK_SUBMIT           = ['STU', 'TA', 'LEC', 'ADM']
+ROLES_TASK_EDIT             = ['TA', 'LEC', 'ADM']
+ROLES_TASK_DELETE           = ['LEC', 'ADM']
+ROLES_TASK_DOWNLOAD         = ['LEC', 'ADM']
+ROLES_SUBMISSION_DOWNLOAD   = ['LEC', 'ADM']
 
 ROLES = {
     'course.view': ROLES_COURSE_VIEW,
@@ -172,6 +175,8 @@ ROLES = {
     'task.edit': ROLES_TASK_EDIT,
     'task.delete': ROLES_TASK_DELETE,
     'task.submit': ROLES_TASK_SUBMIT,
+    'task.download': ROLES_TASK_DOWNLOAD,
+    'submission.download': ROLES_SUBMISSION_DOWNLOAD,
 }
 
 # Upload
@@ -183,7 +188,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )
 }
 
 # Luminus OAuth

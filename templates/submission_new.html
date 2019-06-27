@@ -27,17 +27,17 @@
   <script type="text/javascript">
     var runner_elem = document.getElementById('id_runner');
     var file_elem = document.getElementById('div_id_file');
-    var metadata_elem = document.getElementById('div_id_metadata');
+    var docker_elem = document.getElementById('div_id_docker');
 
     function onRunnerChange(){
       var index = runner_elem.selectedIndex;
       var inputText = runner_elem.children[index].innerHTML.trim();
       if(inputText == 'Python'){
-        metadata_elem.style.display = 'none';
+        docker_elem.style.display = 'none';
         file_elem.style.display = 'block';
       }
       if(inputText == 'Docker'){
-        metadata_elem.style.display = 'block';
+        docker_elem.style.display = 'block';
         file_elem.style.display = 'none';
       }
     }

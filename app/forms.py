@@ -4,6 +4,7 @@ from bootstrap_datepicker_plus import DateTimePickerInput
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Submit
 from .models import Task, Submission, Course
+import io
 
 class HideableForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -14,9 +15,11 @@ class HideableForm(forms.ModelForm):
                 self.fields[fieldname].widget = HiddenInput()
 
 class TaskForm(forms.ModelForm):
+    file = forms.FileField(required=False) # Hack for file field error
+
     class Meta:
         model = Task
-        fields = ['name', 'description', 'daily_submission_limit', 'runtime_limit', 'max_upload_size', 'opened_at', 'closed_at', 'leaderboard']
+        fields = ['name', 'description', 'file', 'daily_submission_limit', 'max_upload_size', 'opened_at', 'closed_at', 'leaderboard']
         labels = {
             "max_upload_size": "Max upload size (KB)",
         }
@@ -30,10 +33,10 @@ class TaskForm(forms.ModelForm):
         self.helper.layout = Layout(
             'name', 
             'description', 
+            'file', 
             Row(
-                Column('daily_submission_limit', css_class='col-4'), 
-                Column('runtime_limit', css_class='col-4'), 
-                Column('max_upload_size', css_class='col-4'), css_class="row"),
+                Column('daily_submission_limit', css_class='col-6'), 
+                Column('max_upload_size', css_class='col-6'), css_class="row"),
             Row(
                 Column('opened_at', css_class='col-6'), 
                 Column('closed_at', css_class='col-6'), css_class="row"),
@@ -42,13 +45,29 @@ class TaskForm(forms.ModelForm):
         )
         super().__init__(*args, **kwargs)
 
+    def show_file_error(self):
+        # Hack: fix inherent bug error not showing on file field
+        self.fields['file'].widget.attrs['class'] =  'clearablefileinput form-control is-invalid'
+
+    def clean_file(self):
+        file = self.cleaned_data.get('file', False)
+        error = None
+        if not file:
+            error = "File is required."
+        if file and isinstance(file, io.BytesIO) and file.content_type != 'application/zip':
+            error = "File type is not supported."
+        if error:
+            self.show_file_error()
+            raise forms.ValidationError(error, code='file_requirement_error')
+        return file
+
 
 class SubmissionForm(forms.ModelForm):
     runner = forms.ChoiceField(choices=Submission.RUNNERS)
 
     class Meta:
         model = Submission
-        fields = ['runner', 'file', 'metadata', 'description']
+        fields = ['runner', 'file', 'docker', 'metadata', 'description']
         labels = {
             "file": "File (.zip)",
         }
@@ -63,18 +82,17 @@ class SubmissionForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(SubmissionForm, self).clean()
-        metadata = cleaned_data.get('metadata', False)
+        docker = cleaned_data.get('docker', False)
         file = cleaned_data.get('file', False)
         runner = cleaned_data.get('runner', False)
-        if not metadata and runner == Submission.RUNNER_DOCKER:
-            raise forms.ValidationError({'metadata': 'Metadata required for Docker runner.'}, code='metadata_required')
+        if not docker and runner == Submission.RUNNER_DOCKER:
+            raise forms.ValidationError({'docker': 'Docker required for Docker runner.'}, code='docker_required')
         if not file and runner == Submission.RUNNER_PYTHON:
             self.show_file_error()
             raise forms.ValidationError({'file': 'File required for Python runner.'}, code='file_required')
 
     def clean_file(self):
         file = self.cleaned_data.get('file', False)
-        runner = self.cleaned_data.get('runner', False)
         if file: 
             message = None
             if file.size > self.instance.task.max_upload_size * 1024:

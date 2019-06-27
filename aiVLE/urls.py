@@ -25,21 +25,21 @@ urlpatterns = [
     url(r'^courses/$', views.courses, name='courses'),
     url(r'^courses/new/$', views.course_add, name='course_add'),
     url(r'^courses/(?P<course_pk>\d+)/$', views.course, name='course'),
-    url(r'^courses/(?P<course_pk>\d+)/delete$', views.course_delete, name='course_delete'),
-    url(r'^courses/(?P<course_pk>\d+)/join$', views.course_join, name='course_join'),
+    url(r'^courses/(?P<course_pk>\d+)/delete/$', views.course_delete, name='course_delete'),
+    url(r'^courses/(?P<course_pk>\d+)/join/$', views.course_join, name='course_join'),
 
     url(r'^courses/(?P<course_pk>\d+)/tasks/new/$', views.task_edit, name='task_new'),
 	url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/edit/$', views.task_edit, name='task_edit'),
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/delete/$', views.task_delete, name='task_delete'),
+    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/leaderboard/$', views.leaderboard, name='leaderboard'),
 
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/submissions/$', views.submissions, name='submissions'),
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/submissions/new/$', views.submission_new, name='submission_new'),
-    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/leaderboard/$', views.leaderboard, name='leaderboard'),
 
+    url(r'^tasks/(?P<pk>\d+)/download/$', views.task_download, name='task_download'),
+    url(r'^submissions/(?P<pk>\d+)/download/$', views.submission_download, name='submission_download'),
 
     path('api/v1/', include(apis.router.urls)),
-
-
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
