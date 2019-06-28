@@ -115,14 +115,14 @@ def task_delete(request, course_pk, task_pk):
     redirect_url = reverse('course', args=(course_pk,))
     return redirect(redirect_url)
 
-# TODO: enable basic auth
+@login_required
 def task_download(request, pk):
     task = get_object_or_404(Task, pk=pk)
     redirect_url = reverse('course', args=(task.course.pk,))
 
-    # if not can(task.course, request.user, 'task.download'):
-    #     messages.error(request, 'You are not allowed to download this task.')
-    #     return redirect(redirect_url)
+    if not can(task.course, request.user, 'task.download'):
+        messages.error(request, 'You are not allowed to download this task.')
+        return redirect(redirect_url)
 
     filename = os.path.basename(task.file.name)
     response = HttpResponse(task.file, content_type='application/zip')
@@ -192,14 +192,14 @@ def submission_new(request, course_pk, task_pk):
 
     return render(request, 'submission_new.html', {'form': form})
 
-# TODO: enable basic auth
+@login_required
 def submission_download(request, pk):
     submission = get_object_or_404(Submission, pk=pk)
     redirect_url = reverse('submissions', args=(submission.task.course.pk,submission.task.pk))
 
-    # if not can(submission.task.course, request.user, 'submission.download'):
-    #     messages.error(request, 'You are not allowed to download this submission.')
-    #     return redirect(redirect_url)
+    if not can(submission.task.course, request.user, 'submission.download', submission=submission):
+        messages.error(request, 'You are not allowed to download this submission.')
+        return redirect(redirect_url)
 
     filename = os.path.basename(submission.file.name)
     response = HttpResponse(submission.file, content_type='application/zip')

@@ -9,7 +9,9 @@ from cachetools import cached, TTLCache
 CourseParticipation = namedtuple('CourseParticipation', ['course', 'participation', 'added', 'joined', 'form'], defaults=(None,) * 5)
 
 
-def can(course, user, action, participation=None):
+def can(course, user, action, participation=None, submission=None):
+    if submission and submission.user == user:
+        return True
     if not participation:
         participation = Participation.objects.get(user=user, course=course)
     return participation and participation.role in settings.ROLES[action]

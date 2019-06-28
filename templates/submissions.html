@@ -64,7 +64,7 @@
               <div class="row">
                 {% if submission.file %}
                 <div class="col-1">{% fa5_icon 'file' 'fas' %}</div>
-                <div class="col-8" style="overflow-wrap: break-word">{{ submission.filename }}</div>
+                <div class="col-8" style="overflow-wrap: break-word"><a href="{% url 'submission_download' submission.pk %}">{{ submission.filename }}</a></div>
                 {% elif submission.metadata %}
                 <div class="col-1">{% fa5_icon 'stream' 'fas' %}</div>
                 <div class="col-8">{{ submission.metadata }}</div>
