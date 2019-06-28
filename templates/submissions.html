@@ -51,7 +51,6 @@
       <thead class="thead-inverse">
         <tr>
           <th>Submission</th>
-          <th>Description</th>
           <th>Point</th>
           <th>Evaluations</th>
           <th>Created At</th>
@@ -64,10 +63,16 @@
               <div class="row">
                 {% if submission.file %}
                 <div class="col-1">{% fa5_icon 'file' 'fas' %}</div>
-                <div class="col-8" style="overflow-wrap: break-word"><a href="{% url 'submission_download' submission.pk %}">{{ submission.filename }}</a></div>
-                {% elif submission.metadata %}
+                <div class="col-8" style="overflow-wrap: break-word">
+                  <a href="{% url 'submission_download' submission.pk %}">{{ submission.filename }}</a>
+                  {% if submission.description %}<br><small>{{ submission.description }}</small>{% endif %}
+                </div>
+                {% elif submission.docker %}
                 <div class="col-1">{% fa5_icon 'stream' 'fas' %}</div>
-                <div class="col-8">{{ submission.metadata }}</div>
+                <div class="col-8">
+                  {{ submission.docker }}<br>
+                  {% if submission.description %}<br><small>{{ submission.description }}</small>{% endif %}
+                </div>
                 {% else %}
                 <div class="col-9">None</div>
                 {% endif %}
@@ -84,7 +89,7 @@
                   {% if submission.status == 'Q' %}
                     {% fa5_icon 'clock' 'fas' color='DodgerBlue' %}
                   {% elif submission.status == 'R' %}
-                    {% fa5_icon 'cog' 'fas' color='OrangeRed' spin=True %}
+                    {% fa5_icon 'cog' 'fas' color='Orange' spin=True %}
                   {% elif submission.status == 'D' %}
                     {% fa5_icon 'check-circle' 'fas' color='ForestGreen' %}
                   {% elif submission.status == 'E' %}
@@ -95,7 +100,6 @@
                 </div>
               </div>
             </td>
-            <td class="align-middle">{{ submission.description }}</td>
             <td class="align-middle">{{ submission.point }}</td>
             <td class="align-middle">
               {% if submission.notes %}
