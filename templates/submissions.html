@@ -5,15 +5,47 @@
 {% load can %}
 {% load define %}
 {% load prettyjson %}
+{% load staticfiles updateable %}
+{% load addstr %}
 
 {% block extrahead %}
   {% prettyjson_setup %}
 
-  <style type="text/css">
-    .jsonwidget > p {
-      display: none;
+  <script>
+    updateableSettings = {
+      timeout: 5000,
+      callback: function() {
+        pause_on_complete();
+        beautify_json();
+      }
+    };
+
+    function need_update(){
+      var update_classes = ['fa-clock', 'fa-cog'];
+      var total_length = 0;
+      update_classes.forEach(function (item, index) {
+        total_length += document.getElementsByClassName(item).length;
+      });
+      return total_length > 0;
     }
-  </style>
+
+    function pause_on_complete(){
+      if(!need_update()){
+        updateableSettings.pause();
+      }
+    }
+
+    function beautify_json(){
+      $(document).find('div-submission').each(function(index, item){
+        var name = item.dataset['updateable'];
+        try {
+          var json = JSON.parse(item.innerHTML);
+          $('#'+name+'-view').JSONView(json, { collapsed: true });
+        } catch { }
+      });
+    }
+  </script>
+  <script src='{% static 'updateable.js' %}'></script>
 {% endblock %}
 
 {% block title %}
@@ -86,27 +118,39 @@
                   {% endif %}
                 </div>
                 <div class="col-1">
-                  {% if submission.status == 'Q' %}
-                    {% fa5_icon 'clock' 'fas' color='DodgerBlue' %}
-                  {% elif submission.status == 'R' %}
-                    {% fa5_icon 'cog' 'fas' color='Orange' spin=True %}
-                  {% elif submission.status == 'D' %}
-                    {% fa5_icon 'check-circle' 'fas' color='ForestGreen' %}
-                  {% elif submission.status == 'E' %}
-                    {% fa5_icon 'times-circle' 'fas' color='red' %}
-                  {% else %}
-                    {{ submission.status }}
-                  {% endif %}
+                  {% with "submission-"|addstr:submission.pk|addstr:"-status" as updateable_id %}
+                    {% updateable updateable_id div %}
+                      {% if submission.status == 'Q' %}
+                        {% fa5_icon 'clock' 'fas' color='DodgerBlue' %}
+                      {% elif submission.status == 'R' %}
+                        {% fa5_icon 'cog' 'fas' color='Orange' spin=True %}
+                      {% elif submission.status == 'D' %}
+                        {% fa5_icon 'check-circle' 'fas' color='ForestGreen' %}
+                      {% elif submission.status == 'E' %}
+                        {% fa5_icon 'times-circle' 'fas' color='red' %}
+                      {% else %}
+                        {{ submission.status }}
+                      {% endif %}
+                    {% endupdateable %}
+                  {% endwith %}
                 </div>
               </div>
             </td>
-            <td class="align-middle">{{ submission.point }}</td>
             <td class="align-middle">
-              {% if submission.notes %}
-                {% prettyjson submission.notes initial='parsed' %}
-              {% else %}
-                {{ submission.notes }}
-              {% endif %}
+              {% with "submission-"|addstr:submission.pk|addstr:"-point" as updateable_id %}
+                {% updateable updateable_id div %}
+                {{ submission.point }}
+                {% endupdateable %}
+              {% endwith %}
+            </td>
+            <td class="align-middle">
+              <div id="submission-{{ submission.pk }}-notes-view">
+                {% with "submission-"|addstr:submission.pk|addstr:"-notes" as updateable_id %}
+                  {% updateable updateable_id div-submission %}
+                  {{ submission.notes }}
+                  {% endupdateable %}
+                {% endwith %}
+              </div>
             </td>
             <td class="align-middle">{{ submission.created_at }}</td>
           </tr>
@@ -114,9 +158,4 @@
       </tbody>
     </table>
   </div>
-  <script type="text/javascript">
-    $(document).ready(function(){
-      $(document).find('div.parsed').JSONView('collapse');
-    });
-  </script>
 {% endblock %}

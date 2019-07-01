@@ -6,3 +6,4 @@ django-fontawesome-5
 cachetools
 djangorestframework
 django-prettyjson
+git+https://github.com/rizkiarm/django-updateable.git@devel
