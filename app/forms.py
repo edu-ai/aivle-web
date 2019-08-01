@@ -19,9 +19,11 @@ class TaskForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['name', 'description', 'file', 'daily_submission_limit', 'max_upload_size', 'opened_at', 'closed_at', 'leaderboard']
+        fields = ['name', 'description', 'file', 'daily_submission_limit', 'max_upload_size', 'run_time_limit', 'max_image_size', 'opened_at', 'closed_at', 'leaderboard']
         labels = {
             "max_upload_size": "Max upload size (KB)",
+            "run_time_limit": "Run time limit (Second)",
+            "max_image_size": "Max container image size (KB)",
         }
         widgets = {
             'opened_at': DateTimePickerInput().start_of('open range'),
@@ -35,8 +37,10 @@ class TaskForm(forms.ModelForm):
             'description', 
             'file', 
             Row(
-                Column('daily_submission_limit', css_class='col-6'), 
-                Column('max_upload_size', css_class='col-6'), css_class="row"),
+                Column('daily_submission_limit', css_class='col-3'), 
+                Column('max_upload_size', css_class='col-3'),
+                Column('run_time_limit', css_class='col-3'), 
+                Column('max_image_size', css_class='col-3'), css_class="row"),
             Row(
                 Column('opened_at', css_class='col-6'), 
                 Column('closed_at', css_class='col-6'), css_class="row"),

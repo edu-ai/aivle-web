@@ -103,6 +103,8 @@ class Participation(models.Model):
 class Task(models.Model):
     DEFAULT_MAX_UPLOAD_SIZE = 5 * 1024 # KB
     DEFAULT_DAILY_SUBMISSIONS_LIMIT = 3
+    DEFAULT_RUN_TIME_LIMIT = 60 # Second
+    DEFAULT_MAX_IMAGE_SIZE = 1000000 # KB
 
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
@@ -112,6 +114,8 @@ class Task(models.Model):
 
     daily_submission_limit = models.PositiveSmallIntegerField(default=DEFAULT_DAILY_SUBMISSIONS_LIMIT)
     max_upload_size = models.IntegerField(default=DEFAULT_MAX_UPLOAD_SIZE)
+    run_time_limit = models.IntegerField(default=DEFAULT_RUN_TIME_LIMIT)
+    max_image_size = models.IntegerField(default=DEFAULT_MAX_IMAGE_SIZE)
 
     opened_at = models.DateTimeField(blank=True, null=True)
     closed_at = models.DateTimeField(blank=True, null=True)
