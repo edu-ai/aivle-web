@@ -13,7 +13,7 @@ def can(course, user, action, participation=None, submission=None):
     if submission and submission.user == user:
         return True
     if not participation:
-        participation = Participation.objects.get(user=user, course=course)
+        participation = Participation.objects.filter(user=user, course=course).first()
     return participation and participation.role in settings.ROLES[action]
 
 
@@ -39,9 +39,9 @@ def serialize_submission(s):
 @cached(cache=TTLCache(maxsize=1024, ttl=60*60))
 def get_course_roles_from_luminus(user):
     # DUMMY, replace with API call to luminus
-    roles = [Participation.ROLE_LECTURER, Participation.ROLE_STUDENT, Participation.ROLE_GUEST]
+    roles = [Participation.ROLE_STUDENT]
     course_roles = []
-    for i, code in enumerate(['CS4246', 'CS0001', 'CS0002', 'CS0003', 'CS0004']):
+    for i, code in enumerate(['CS4246']):
         course = Course(code=code, academic_year="2019/2020", semester=1)
         role = roles[i % len(roles)]
         course_roles.append((course, role))

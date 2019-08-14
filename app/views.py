@@ -3,9 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models.aggregates import Max
 from django.http import HttpResponse
+from django.contrib.auth import login, authenticate
 
 from .models import Course, Task, Submission, Participation
-from .forms import TaskForm, SubmissionForm, CourseForm
+from .forms import TaskForm, SubmissionForm, CourseForm, RegisterForm
 from .funcs import can, submission_is_allowed, course_participations, course_participation
 
 import os
@@ -206,3 +207,20 @@ def submission_download(request, pk):
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
 
     return response
+
+def signup(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.cleaned_data['is_active'] = False
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            login(request, user)
+            messages.info(request, 'Registration successful. Your account is currently pending approval.')
+            return redirect('home')
+    else:
+        form = RegisterForm()
+    return render(request, 'signup.html', {'form': form})

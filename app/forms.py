@@ -1,5 +1,7 @@
 from django import forms
 from django.forms.widgets import HiddenInput
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from bootstrap_datepicker_plus import DateTimePickerInput
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Submit
@@ -108,7 +110,21 @@ class SubmissionForm(forms.ModelForm):
                 raise forms.ValidationError(message, code='file_requirement_error')
         return file
 
+
 class CourseForm(HideableForm):
     class Meta:
         model = Course
         fields = ('code', 'academic_year', 'semester')
+
+
+class RegisterForm(UserCreationForm):
+    email = forms.EmailField(label = "Email")
+    first_name = forms.CharField(label = "First name")
+    last_name = forms.CharField(label = "Last name")
+
+    class Meta:
+        model = User
+        labels = {
+            "username": "Student ID",
+        }
+        fields = ("username", "email", "first_name", "last_name")
