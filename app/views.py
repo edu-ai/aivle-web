@@ -137,12 +137,19 @@ def submissions(request, course_pk, task_pk):
     redirect_url = reverse('course', args=(task.course.pk,))
 
     if not can(task.course, request.user, 'task.view'):
-        messages.error(request, 'You are not allowed to view this task submissions.')
+        messages.error(request, 'You are not allowed to view this task.')
         return redirect(redirect_url)
 
-    submissions = task.submissions.filter(user=request.user).order_by('-created_at')
+    view_all = 'all' in request.GET
+    if view_all:
+        if not can(task.course, request.user, 'submission.view'):
+            messages.error(request, 'You are not allowed to view this task submissions.')
+            return redirect(redirect_url)
+        submissions = task.submissions.order_by('-created_at')
+    else:
+        submissions = task.submissions.filter(user=request.user).order_by('-created_at')
 
-    return render(request, 'submissions.html', {'task': task, 'submissions': submissions})
+    return render(request, 'submissions.html', {'task': task, 'submissions': submissions, 'view_all': view_all})
 
 @login_required
 def leaderboard(request, course_pk, task_pk):
