@@ -167,7 +167,8 @@ ROLES_TASK_SUBMIT           = ['STU', 'TA', 'LEC', 'ADM']
 ROLES_TASK_EDIT             = ['TA', 'LEC', 'ADM']
 ROLES_TASK_DELETE           = ['LEC', 'ADM']
 ROLES_TASK_DOWNLOAD         = ['LEC', 'ADM']
-ROLES_SUBMISSION_DOWNLOAD   = ['LEC', 'ADM']
+ROLES_SUBMISSION_DOWNLOAD   = ['LEC', 'ADM', 'TA']
+ROLES_SUBMISSION_VIEW       = ['LEC', 'ADM', 'TA']
 
 ROLES = {
     'course.view': ROLES_COURSE_VIEW,
@@ -180,6 +181,7 @@ ROLES = {
     'task.submit': ROLES_TASK_SUBMIT,
     'task.download': ROLES_TASK_DOWNLOAD,
     'submission.download': ROLES_SUBMISSION_DOWNLOAD,
+    'submission.view': ROLES_SUBMISSION_VIEW,
 }
 
 # Upload
