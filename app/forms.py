@@ -98,13 +98,14 @@ class SubmissionForm(forms.ModelForm):
             raise forms.ValidationError({'file': 'File required for Python runner.'}, code='file_required')
 
     def clean_file(self):
+        SUPPORTED_FILETYPES = ['application/zip', 'application/zip-compressed', 'application/x-zip-compressed', 'multipart/x-zip']
         file = self.cleaned_data.get('file', False)
         if file: 
             message = None
             if file.size > self.instance.task.max_upload_size * 1024:
                 message = "File size is too large ({}KB > {}KB).".format(round(file.size/1024), self.instance.task.max_upload_size)
-            if file.content_type != 'application/zip':
-                message = "File type is not supported."
+            if file.content_type not in SUPPORTED_FILETYPES:
+                message = "File type: {} is not supported.".format(file.content_type)
             if message:
                 self.show_file_error()
                 raise forms.ValidationError(message, code='file_requirement_error')
