@@ -106,7 +106,7 @@ class SubmissionForm(forms.ModelForm):
             if file.content_type != 'application/zip':
                 message = "File type is not supported."
             if message:
-                show_file_error()
+                self.show_file_error()
                 raise forms.ValidationError(message, code='file_requirement_error')
         return file
 

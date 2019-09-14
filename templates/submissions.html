@@ -71,7 +71,14 @@
   {% endif %}
 
   <h1>{{ task.name }}</h1>
-  <span>{{ task.description }}</span><hr>
+  <span>{{ task.description }}</span>
+  <br>
+  <hr>
+  {{ task.daily_submission_limit }} max daily submission(s), 
+  {{ task.max_upload_size }} KB, 
+  {{ task.run_time_limit }} seconds time limit
+  
+  <hr>
 
   <div class="mb-4">
     <a href="{% url 'submission_new' task.course.pk task.pk %}" class='btn {{ button_decorator }}'>{% fa5_icon 'plus-circle' 'fas' %} New submission</a>
