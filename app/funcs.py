@@ -18,7 +18,7 @@ def can(course, user, action, participation=None, submission=None):
 
 
 def submission_is_allowed(task, user):
-    user_today_submissions = task.submissions.filter(user=user).filter(created_at__gt=timezone.now().date())
+    user_today_submissions = task.submissions.filter(user=user).filter(created_at__gt=timezone.localtime(timezone.now()).date())
     return task.daily_submission_limit and user_today_submissions.count() < task.daily_submission_limit
 
 
