@@ -7,3 +7,4 @@ cachetools
 djangorestframework
 django-prettyjson
 git+https://github.com/rizkiarm/django-updateable.git@devel
+xlwt

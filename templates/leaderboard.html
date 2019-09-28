@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 
+{% load can %}
+{% load fontawesome_5 %}
+
 {% block title %}
   Leaderboard - {{ task.name }} - {{ task.course.code }} - {{ block.super }}
 {% endblock %}
@@ -12,8 +15,15 @@
 {% endblock %}
 
 {% block content %}
+  {% can task.course request.user 'task.edit' as can_edit %}
+
   <h1>Leaderboard</h1>
-  <br>
+
+  <div class="mb-4">
+    {% if can_edit %}
+      <a href="{% url 'leaderboard' task.course.pk task.pk %}?download" class="btn btn-success">{% fa5_icon 'file-excel' 'fas' %} Export to XLS</a>
+    {% endif %}
+  </div>
 
   <div class="table-responsive">
     <table class="table">

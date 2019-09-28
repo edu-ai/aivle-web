@@ -10,6 +10,9 @@ from .forms import TaskForm, SubmissionForm, CourseForm, RegisterForm
 from .funcs import can, submission_is_allowed, course_participations, course_participation
 
 import os
+import xlwt
+
+from django.http import HttpResponse
 
 
 @login_required
@@ -180,6 +183,25 @@ def leaderboard(request, course_pk, task_pk):
         if s.user.id not in users:
             users[s.user.id] = True
             leaderboard_list.append(s)
+
+    if 'download' in request.GET:
+        response = HttpResponse(content_type='application/ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="{}.xls"'.format(task.name)
+
+        wb = xlwt.Workbook(encoding='utf-8')
+        sheet = wb.add_sheet('Sheet1')
+
+        font_style = xlwt.XFStyle()
+        font_style.font.bold = True
+        for i, h in enumerate(['STUDENT_NUMBER', 'MARKS', 'MODERATION', 'REMARKS']):
+            sheet.write(0, i, h, font_style)
+        for i, s in enumerate(leaderboard_list):   
+            sheet.write(i+1, 0, s.user.username)
+            sheet.write(i+1, 1, s.point)
+
+        wb.save(response)
+        return response
+
 
     return render(request, 'leaderboard.html', {'task': task, 'submissions': leaderboard_list})
 
