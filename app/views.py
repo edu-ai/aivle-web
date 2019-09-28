@@ -154,10 +154,16 @@ def submissions(request, course_pk, task_pk):
 @login_required
 def leaderboard(request, course_pk, task_pk):
     task = get_object_or_404(Task, pk=task_pk)
+    redirect_url = reverse('submissions', args=(course_pk,task_pk))
 
     if not can(task.course, request.user, 'task.view'):
         messages.error(request, 'You are not participating in this course.')
-        return redirect(reverse('course', args=(task.course.pk,task_pk)))
+        return redirect(redirect_url)
+
+    if not can(task.course, request.user, 'task.edit') and not task.leaderboard:
+        messages.error(request, 'Task doesn\'t have leaderboard.')
+        return redirect(redirect_url)
+
 
     user_maxpoints = task.submissions.values('user') \
                                 .annotate(max_point=Max('point')) \
@@ -169,6 +175,8 @@ def leaderboard(request, course_pk, task_pk):
     # Hack: otherwise will output multiple same user if got the same point on multiple submissions
     leaderboard_list, users = [], {}
     for s in submissions:
+        if can(task.course, s.user, 'task.edit'):
+            continue
         if s.user.id not in users:
             users[s.user.id] = True
             leaderboard_list.append(s)

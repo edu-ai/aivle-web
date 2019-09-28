@@ -87,7 +87,7 @@
 
   <div class="mb-4">
     <a href="{% url 'submission_new' task.course.pk task.pk %}" class='btn {{ button_decorator }}'>{% fa5_icon 'plus-circle' 'fas' %} New submission</a>
-    {% if task.leaderboard %}
+    {% if can_edit or task.leaderboard %}
       <a href="{% url 'leaderboard' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'crown' 'fas' %} Leaderboard</a>
     {% endif %}
     {% if can_view_all and not view_all %}
