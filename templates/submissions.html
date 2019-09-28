@@ -61,10 +61,11 @@
 {% block content %}
 
   {% submission_is_allowed task request.user as submission_allowed %}
+  {% can task.course request.user 'task.edit' as can_edit %}
   {% can task.course request.user 'task.submit' as can_submit %}
   {% can task.course request.user 'submission.view' as can_view_all %}
 
-  {% if submission_allowed and can_submit and task.is_open %}
+  {% if can_edit or submission_allowed and can_submit and task.is_open %}
     {% define "btn-primary" as button_decorator %}
   {% else %}
     {% define "btn-secondary" as button_decorator %}

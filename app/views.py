@@ -184,12 +184,13 @@ def submission_new(request, course_pk, task_pk):
         messages.error(request, 'You are not allowed to submit this task.')
         return redirect(redirect_url)
 
-    if not task.is_open:
-        messages.error(request, 'Task is {}.'.format(task.get_status_display().lower()))
-        return redirect(redirect_url)
-    if not submission_is_allowed(task, request.user):
-        messages.error(request, 'Daily submission limit exceeded.')
-        return redirect(redirect_url)
+    if not can(task.course, request.user, 'task.edit'):
+        if not task.is_open:
+            messages.error(request, 'Task is {}.'.format(task.get_status_display().lower()))
+            return redirect(redirect_url)
+        if not submission_is_allowed(task, request.user):
+            messages.error(request, 'Daily submission limit exceeded.')
+            return redirect(redirect_url)
 
     submission = Submission(task=task, user=request.user)
     form = SubmissionForm(request.POST or None, request.FILES or None, instance=submission)
