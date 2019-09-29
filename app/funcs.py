@@ -5,6 +5,9 @@ from django.utils import timezone
 from collections import namedtuple
 from cachetools import cached, TTLCache
 
+import urllib.request
+import re
+
 
 CourseParticipation = namedtuple('CourseParticipation', ['course', 'participation', 'added', 'joined', 'form'], defaults=(None,) * 5)
 
@@ -81,3 +84,22 @@ def course_participation(user, course):
     cps = course_participations(user)
     cp = next(filter(lambda cp: cp.course == course,  cps))
     return cp
+
+
+@cached(cache=TTLCache(maxsize=1024, ttl=10*60))
+def get_announcements(): # [ (announcement, type) ]
+    try:
+        announcements = urllib.request.urlopen(settings.ANNOUNCEMENT_URL).read().decode('utf-8').replace('*','').split('\n')
+        if len(announcements) == 1 and announcements[0] == ' ':
+            return []
+        announcements_types = []
+        for announcement in announcements:
+            try:
+                alert_type = re.findall(r"<!-- (.+) -->", announcement, re.MULTILINE)[0]
+                alert = re.findall(r"<!-- .+ -->", announcement, re.MULTILINE)[0]
+                announcements_types.append((announcement.replace(alert, ''), alert_type))
+            except:
+                announcements_types.append((announcement, 'alert-primary'))
+        return announcements_types
+    except:
+        return []

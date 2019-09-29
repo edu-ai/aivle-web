@@ -31,6 +31,7 @@
         <tr>
           <th>Rank</th>
           <th>Username</th>
+          <th>Name</th>
           <th>Point</th>
           <th>Created At</th>
         </tr>
@@ -40,6 +41,7 @@
           <tr>
             <td class="align-middle">{{ forloop.counter }}</td>
             <td class="align-middle">{{ submission.user }}</td>
+            <td class="align-middle">{{ submission.user.first_name }} {{ submission.user.last_name }}</td>
             <td class="align-middle">{{ submission.point }}</td>
             <td class="align-middle">{{ submission.created_at }}</td>
           </tr>

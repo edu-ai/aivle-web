@@ -74,6 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'app.context_processors.announcements',
             ],
         },
     },
@@ -212,3 +213,7 @@ class LuminusOAuthConfig:
     class Redirect:
         authorization = None
         access_token  = None
+
+# Announcement
+
+ANNOUNCEMENT_URL = 'https://raw.githubusercontent.com/wiki/cs4246/meta/Announcements.md'
