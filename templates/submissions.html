@@ -11,6 +11,19 @@
 {% block extrahead %}
   {% prettyjson_setup %}
 
+  <style>
+    ul.button-list {
+	padding: 0px;
+	list-style: none;
+    }
+
+    ul.button-list > li {
+    	margin-right: 5px;
+	margin-bottom: 5px;
+	display: inline-block;
+    }
+  </style>
+
   <script>
     updateableSettings = {
       timeout: 5000,
@@ -73,30 +86,28 @@
 
   <h1>{{ task.name }}</h1>
   <span>{{ task.description }}</span>
-  <br><br>
 
-  <div class="card">
+  <div class="card" style="margin-top:20px; margin-bottom:20px">
     <div class="card-body">
 	{{ task.daily_submission_limit }} max daily submission(s), 
         {{ task.max_upload_size }} KB max size, 
         {{ task.run_time_limit }} second(s) time limit.
     </div>
-  </div>
+  </div> 
 
-  <br> 
-
-  <div class="mb-4">
-    <a href="{% url 'submission_new' task.course.pk task.pk %}" class='btn {{ button_decorator }}'>{% fa5_icon 'plus-circle' 'fas' %} New submission</a>
-    {% if can_edit or task.leaderboard %}
-      <a href="{% url 'leaderboard' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'crown' 'fas' %} Leaderboard</a>
-    {% endif %}
-    {% if can_view_all and not view_all %}
-      <a href="{% url 'submissions' task.course.pk task.pk %}?all" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View All</a>
-    {% endif %}
-    {% if can_view_all and view_all %}
-      <a href="{% url 'submissions' task.course.pk task.pk %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Mine</a>
-    {% endif %}
-  </div>
+    <ul class="button-list">
+	<li><a href="{% url 'submission_new' task.course.pk task.pk %}" class='btn {{ button_decorator }}'>{% fa5_icon 'plus-circle' 'fas' %} New submission</a></li>
+      {% if can_edit or task.leaderboard %}
+    	<li><a href="{% url 'leaderboard' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'crown' 'fas' %} Leaderboard</a></li>
+      {% endif %}
+      {% if can_view_all and not view_all %}
+      	<li><a href="{% url 'submissions' task.course.pk task.pk %}?all" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View All</a></li>
+      {% endif %}
+      {% if can_view_all and view_all %}
+    	<li><a href="{% url 'submissions' task.course.pk task.pk %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Mine</a></li>
+      {% endif %}
+    </ul>
+ 
   <div class="table-responsive">
     <table class="table">
       <thead class="thead-inverse">

@@ -145,7 +145,7 @@ class Task(models.Model):
 
     def get_status_display(self):
         if self.is_dead:
-            return "Overdue"
+            return "Closed"
         return "Open" if self.is_open else "Scheduled"
 
     @property
