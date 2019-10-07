@@ -63,7 +63,7 @@
 
       {% for announcement in announcements %}
         <div class="alert {{ announcement.1 }}" style="margin-top: 10px; margin-bottom: 5px">
-          {{ announcement.0 }}
+          {{ announcement.0 | safe }}
         </div>
       {% endfor %}
 

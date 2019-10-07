@@ -195,7 +195,7 @@ class Submission(models.Model):
         choices=STATUSES,
         default=STATUS_QUEUED,
     )
-    point = models.IntegerField(blank=True, null=True)
+    point = models.DecimalField(max_digits=9, decimal_places=3, blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
 
     created_at = models.DateTimeField(default=timezone.now)

@@ -96,8 +96,7 @@ def get_announcements(): # [ (announcement, type) ]
         for announcement in announcements:
             try:
                 alert_type = re.findall(r"<!-- (.+) -->", announcement, re.MULTILINE)[0]
-                alert = re.findall(r"<!-- .+ -->", announcement, re.MULTILINE)[0]
-                announcements_types.append((announcement.replace(alert, ''), alert_type))
+                announcements_types.append((announcement, alert_type))
             except:
                 announcements_types.append((announcement, 'alert-primary'))
         return announcements_types
