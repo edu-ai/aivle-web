@@ -9,6 +9,7 @@
 {% load addstr %}
 {% load autolink %}
 {% load query_transform %}
+{% load suggestion %}
 
 {% block extrahead %}
   {% prettyjson_setup %}
@@ -153,6 +154,9 @@
             {% if can_edit or task.leaderboard %}
             <li><a href="{% url 'leaderboard' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'crown' 'fas' %} Leaderboard</a></li>
             {% endif %}
+            {% if can_edit %}
+            <li><a href="{% url 'stats' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'signal' 'fas' %} Stats</a></li>
+            {% endif %}
             {% if can_view_all and not view_all %}
               <li><a href="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request others=1 %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Others</a></li>
             {% endif %}
@@ -292,6 +296,7 @@
               <td colspan="10">
                 <div class="collapse" id="collapse-evaluation-{{submission.pk}}">
                   <div class="card card-body">
+                    <small style="font-weight: bold;">EVALUATION:</small>
                     <div id="submission-{{ submission.pk }}-notes-view">
                       {% with "submission-"|addstr:submission.pk|addstr:"-notes" as updateable_id %}
                         {% updateable updateable_id div-submission %}
@@ -299,6 +304,13 @@
                         {% endupdateable %}
                       {% endwith %}
                     </div>
+                    <hr>
+                    <small style="font-weight: bold;">SUGGESTION:</small>
+                    {% with "submission-"|addstr:submission.pk|addstr:"-suggestion" as updateable_id %}
+                      {% updateable updateable_id div-submission %}
+                      {{ submission.notes | suggestion }}
+                      {% endupdateable %}
+                    {% endwith %}
                   </div>
                 </div>
               </td>

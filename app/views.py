@@ -5,6 +5,7 @@ from django.db.models.aggregates import Max
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
 from django.core.paginator import Paginator
+from django.db.models import Count
 
 from .models import Course, Task, Submission, Participation
 from .forms import TaskForm, SubmissionForm, CourseForm, RegisterForm
@@ -14,6 +15,7 @@ import os
 import xlwt
 
 from django.http import HttpResponse
+from datetime import date, timedelta
 
 
 @login_required
@@ -216,6 +218,47 @@ def leaderboard(request, course_pk, task_pk):
 
 
     return render(request, 'leaderboard.html', {'task': task, 'submissions': leaderboard_list})
+
+@login_required
+def stats(request, course_pk, task_pk):
+    task = get_object_or_404(Task, pk=task_pk)
+    redirect_url = reverse('submissions', args=(course_pk,task_pk))
+
+    if not can(task.course, request.user, 'task.edit'):
+        messages.error(request, 'You can\'t see the stats of this task.')
+        return redirect(redirect_url)
+
+    base = task.submissions.extra({'created_at':"date(created_at)"}).values('created_at')
+    submissions = base.annotate(count=Count('id')).all()
+    successes = base.filter(status=Submission.STATUS_DONE).annotate(count=Count('id')).all()
+    failures = base.filter(status=Submission.STATUS_ERROR).annotate(count=Count('id')).all()
+
+    labels = [d['created_at'] for d in submissions]
+
+    sdate = date(*[int(i) for i in labels[0].split('-')])
+    edate = date(*[int(i) for i in labels[-1].split('-')])
+    delta = edate - sdate
+
+    counts = {}
+    for i in range(delta.days + 1):
+        day = sdate + timedelta(days=i)
+        counts[str(day)] = {'successes':0, 'failures':0}
+
+    for s in successes:
+        counts[s['created_at']]['successes'] = s['count']
+    for s in failures:
+        counts[s['created_at']]['failures'] = s['count']
+
+    labels = []
+    data = {'successes': [], 'failures': []}
+    for day, stat in counts.items():
+        labels.append(day)
+        data['successes'].append(stat['successes'])
+        data['failures'].append(stat['failures'])
+    data['successes_count'] = sum(data['successes'])
+    data['failures_count'] = sum(data['failures'])
+
+    return render(request, 'stats.html', {'task': task, 'labels': labels, 'data': data})
 
 @login_required
 def submission_new(request, course_pk, task_pk):

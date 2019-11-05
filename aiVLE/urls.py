@@ -32,6 +32,7 @@ urlpatterns = [
 	url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/edit/$', views.task_edit, name='task_edit'),
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/delete/$', views.task_delete, name='task_delete'),
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/leaderboard/$', views.leaderboard, name='leaderboard'),
+    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/stats/$', views.stats, name='stats'),
 
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/submissions/$', views.submissions, name='submissions'),
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/submissions/new/$', views.submission_new, name='submission_new'),
