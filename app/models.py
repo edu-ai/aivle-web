@@ -6,6 +6,7 @@ from django.shortcuts import reverse
 from django.core.files.storage import default_storage
 import os
 import hashlib
+import json
 
 class ExtraFileField(models.FileField):
     def __init__(self, verbose_name=None, name=None, upload_to='', after_file_save=None, storage=None, **kwargs):
@@ -207,6 +208,17 @@ class Submission(models.Model):
     @property
     def file_url(self):
         return reverse('submission_download', args=(self.task.course.pk,self.task.pk, self.pk))
+
+    @property
+    def info(self):
+        try:
+            return json.loads(self.notes)['error']['type']
+        except:
+            return self.point
+
+    @property
+    def queue(self):
+        return Submission.objects.filter(status=Submission.STATUS_QUEUED, created_at__lte=self.created_at).count()
 
     def __str__(self):
         return "{}:{} - {} - {} AY{} Sem{}".format(self.user, self.pk, self.task.name, 

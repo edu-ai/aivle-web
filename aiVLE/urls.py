@@ -38,6 +38,7 @@ urlpatterns = [
 
     url(r'^tasks/(?P<pk>\d+)/download/$', views.task_download, name='task_download'),
     url(r'^submissions/(?P<pk>\d+)/download/$', views.submission_download, name='submission_download'),
+    url(r'^submissions/action/$', views.submissions_action, name='submissions_action'),
 
     path('api/v1/', include(apis.router.urls)),
     path('admin/', admin.site.urls),

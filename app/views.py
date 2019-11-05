@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.db.models.aggregates import Max
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
+from django.core.paginator import Paginator
 
 from .models import Course, Task, Submission, Participation
 from .forms import TaskForm, SubmissionForm, CourseForm, RegisterForm
@@ -143,7 +144,7 @@ def submissions(request, course_pk, task_pk):
         messages.error(request, 'You are not allowed to view this task.')
         return redirect(redirect_url)
 
-    view_all = 'all' in request.GET
+    view_all = 'others' in request.GET
     if view_all:
         if not can(task.course, request.user, 'submission.view'):
             messages.error(request, 'You are not allowed to view this task submissions.')
@@ -151,8 +152,16 @@ def submissions(request, course_pk, task_pk):
         submissions = task.submissions.order_by('-created_at')
     else:
         submissions = task.submissions.filter(user=request.user).order_by('-created_at')
+    submissions = submissions.all()
 
-    return render(request, 'submissions.html', {'task': task, 'submissions': submissions, 'view_all': view_all})
+    per_page_options = [10, 20, 50, 100, 1000]
+    per_page = request.GET.get('per_page', 10)
+    paginator = Paginator(submissions, per_page) # Show 25 contacts per page
+    page = request.GET.get('page')
+    submissions = paginator.get_page(page)
+
+    return render(request, 'submissions.html', {'task': task, 'submissions': submissions, 'view_all': view_all, 
+                                                'per_page_options': per_page_options})
 
 @login_required
 def leaderboard(request, course_pk, task_pk):
@@ -173,16 +182,19 @@ def leaderboard(request, course_pk, task_pk):
                                 .order_by('-max_point') \
                                 .values('max_point')
 
-    submissions = task.submissions.order_by('-point').filter(point__in=user_maxpoints).all()
+    submissions = task.submissions.order_by('-point').filter(point__in=user_maxpoints)
 
     # Hack: otherwise will output multiple same user if got the same point on multiple submissions
     leaderboard_list, users = [], {}
-    for s in submissions:
-        if can(task.course, s.user, 'task.edit'):
+    for s in submissions.all():
+        if can(task.course, s.user, 'task.edit') or not s.user.is_active:
             continue
         if s.user.id not in users:
             users[s.user.id] = True
             leaderboard_list.append(s)
+
+    if not can(task.course, request.user, 'task.edit'):
+        leaderboard_list = leaderboard_list[:20] # show only 20 submissions
 
     if 'download' in request.GET:
         response = HttpResponse(content_type='application/ms-excel')
@@ -245,6 +257,31 @@ def submission_download(request, pk):
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
 
     return response
+
+@login_required
+def submissions_action(request):
+    if request.method == 'POST':
+        if 'rerun' in request.POST:
+            return submissions_rerun(request)
+    return redirect(request.META.get('HTTP_REFERER'))
+
+@login_required
+def submissions_rerun(request):
+    if request.method == 'POST':
+        pks = [int(pk) for pk in request.POST.getlist('submissions_selected[]')]
+        submissions_q = Submission.objects.filter(pk__in=pks)
+
+        # Permission check
+        for submission in submissions_q.all():
+            if not can(submission.task.course, request.user, 'submission.rerun', submission=submission):
+                redirect_url = reverse('submissions', args=(submission.task.course.pk,submission.task.pk))
+                messages.error(request, 'You are not allowed to rerun this submission: {}.'.format(submission.pk))
+                return redirect(redirect_url)
+
+        submissions_q.update(status=Submission.STATUS_QUEUED)
+        messages.info(request, 'Submissions re-queued for run: {}.'.format(pks))
+
+    return redirect(request.META.get('HTTP_REFERER'))
 
 def signup(request):
     if request.method == 'POST':

@@ -7,20 +7,67 @@
 {% load prettyjson %}
 {% load staticfiles updateable %}
 {% load addstr %}
+{% load autolink %}
+{% load query_transform %}
 
 {% block extrahead %}
   {% prettyjson_setup %}
 
   <style>
     ul.button-list {
-	padding: 0px;
-	list-style: none;
+    	padding: 0px;
+    	list-style: none;
     }
 
     ul.button-list > li {
     	margin-right: 5px;
-	margin-bottom: 5px;
-	display: inline-block;
+    	margin-bottom: 5px;
+    	display: inline-block;
+    }
+
+    tr.collapsible > td {
+      padding: 0px;
+      border-top: 0px;
+    }
+
+    .vcenter {
+      display: flex;
+      align-items: center;
+    }
+
+    .clickable.collapsed:hover {
+      background-color: #ecf0f1;
+    }
+
+    .clickable {
+      background-color: #D6EAF8;
+      cursor: pointer;
+    }
+
+    .clickable.collapsed {
+      background-color: white;
+    }
+
+    .flash-box {
+      -webkit-animation-name: flash-anim; /* Safari 4.0 - 8.0 */
+      -webkit-animation-duration: 1.5s; /* Safari 4.0 - 8.0 */
+      animation-name: flash-anim;
+      animation-duration: 1.5s;
+      animation-direction: alternate;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out; 
+    }
+
+    /* Safari 4.0 - 8.0 */
+    @-webkit-keyframes flash-anim {
+      from {background-color: rgba(255, 255, 0, 0.0);}
+      to {background-color: rgba(255, 255, 0, 0.30);}
+    }
+
+    /* Standard syntax */
+    @keyframes flash-anim {
+      from {background-color: rgba(255, 255, 0, 0.0);}
+      to {background-color: rgba(255, 255, 0, 0.30);}
     }
   </style>
 
@@ -53,7 +100,7 @@
         var name = item.dataset['updateable'];
         try {
           var json = JSON.parse(item.innerHTML);
-          $('#'+name+'-view').JSONView(json, { collapsed: true });
+          $('#'+name+'-view').JSONView(json, { collapsed: false });
         } catch { }
       });
     }
@@ -77,6 +124,7 @@
   {% can task.course request.user 'task.edit' as can_edit %}
   {% can task.course request.user 'task.submit' as can_submit %}
   {% can task.course request.user 'submission.view' as can_view_all %}
+  {% can task.course request.user 'submission.rerun' as can_rerun %}
 
   {% if can_edit or submission_allowed and can_submit and task.is_open %}
     {% define "btn-primary" as button_decorator %}
@@ -95,107 +143,230 @@
     </div>
   </div> 
 
+  <form action="{% url 'submissions_action' %}" method="post">
+    {% csrf_token %}
+
     <ul class="button-list">
-	<li><a href="{% url 'submission_new' task.course.pk task.pk %}" class='btn {{ button_decorator }}'>{% fa5_icon 'plus-circle' 'fas' %} New submission</a></li>
+      <li><a href="{% url 'submission_new' task.course.pk task.pk %}" class='btn {{ button_decorator }}'>{% fa5_icon 'plus-circle' 'fas' %} New submission</a></li>
       {% if can_edit or task.leaderboard %}
     	<li><a href="{% url 'leaderboard' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'crown' 'fas' %} Leaderboard</a></li>
       {% endif %}
       {% if can_view_all and not view_all %}
-      	<li><a href="{% url 'submissions' task.course.pk task.pk %}?all" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View All</a></li>
+      	<li><a href="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request others=1 %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Others</a></li>
       {% endif %}
       {% if can_view_all and view_all %}
-    	<li><a href="{% url 'submissions' task.course.pk task.pk %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Mine</a></li>
+    	<li><a href="{% url 'submissions' task.course.pk task.pk %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Less</a></li>
+      {% endif %}
+      {% if can_rerun %}
+      <li><button type="submit" name="rerun" class="btn btn-info">{% fa5_icon 'cog' 'fas' %} Re-Run</button></li>
       {% endif %}
     </ul>
- 
-  <div class="table-responsive">
-    <table class="table">
-      <thead class="thead-inverse">
-        <tr>
-          {% if view_all %}
-          <th>User</th>
-          {% endif %}
-          <th>Submission</th>
-          <th>Point</th>
-          <th>Evaluations</th>
-          <th>Created At</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for submission in submissions.all %}
+   
+    <div class="table-responsive">
+      <table class="table">
+        <thead class="thead-inverse">
           <tr>
-            {% if view_all %}
-            <td class="align-middle">
-              <div class="row">
-                <div class="col-12">{{ submission.user }}</div>
-              </div>
-            </td>
+            {% if can_edit %}
+            <th>#</th>
             {% endif %}
-            <td class="align-middle">
-              <div class="row">
-                {% if submission.file %}
-                <div class="col-1">{% fa5_icon 'file' 'fas' %}</div>
-                <div class="col-8" style="overflow-wrap: break-word">
-                  <a href="{% url 'submission_download' submission.pk %}">{{ submission.filename }}</a>
-                  {% if submission.description %}<br><small>{{ submission.description }}</small>{% endif %}
+            <th>ID</th>
+            {% if view_all %}
+            <th>User</th>
+            <th>Name</th>
+            {% endif %}
+            <th>Submission</th>
+            <th>Verdict</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for submission in submissions %}
+            {% with "submission-"|addstr:submission.pk|addstr:"-progress" as updateable_id %}
+            {% updateable updateable_id div %}
+            {% if submission.status == 'R' %}
+            <tr class="flash-box clickable collapsed" data-toggle="collapse" href="#collapse-evaluation-{{submission.pk}}" role="button" aria-expanded="false">
+            {% else %}
+            <tr class="clickable collapsed" data-toggle="collapse" href="#collapse-evaluation-{{submission.pk}}" role="button" aria-expanded="false">
+            {% endif %}
+            {% endupdateable %}
+            {% endwith %}
+              {% if can_edit %}
+              <td class="align-middle">
+                <div class="row">
+                  <div class="col-12">
+                    <input type="checkbox" name="submissions_selected[]" value="{{ submission.pk }}" />
+                  </div>
                 </div>
-                {% elif submission.docker %}
-                <div class="col-1">{% fa5_icon 'stream' 'fas' %}</div>
-                <div class="col-8">
-                  {{ submission.docker }}<br>
-                  {% if submission.description %}<br><small>{{ submission.description }}</small>{% endif %}
+              </td>
+              {% endif %}
+              <td class="align-middle">
+                <div class="row">
+                  <div class="col-12">{{ submission.pk }}</div>
                 </div>
-                {% else %}
-                <div class="col-9">None</div>
-                {% endif %}
-                <div class="col-1">
-                  {% if submission.runner == 'PY' %}
-                    {% fa5_icon 'python' 'fab' %}
-                  {% elif submission.runner == 'DO' %}
-                    {% fa5_icon 'docker' 'fab' %}
+              </td>
+              {% if view_all %}
+              <td class="align-middle">
+                <div class="row">
+                  <div class="col-12">{{ submission.user }}</div>
+                </div>
+              </td>
+              <td class="align-middle">
+                <div class="row">
+                  <div class="col-12">{{ submission.user.first_name }} {{ submission.user.last_name }}</div>
+                </div>
+              </td>
+              {% endif %}
+              <td class="align-middle">
+                <div class="row vcenter">
+                  {% if submission.file %}
+                  <div class="col-1">{% fa5_icon 'file' 'fas' %}</div>
+                  <div class="col-8" style="overflow-wrap: break-word">
+                    <a href="{% url 'submission_download' submission.pk %}">{{ submission.filename }}</a>
+                    {% if submission.description %}<br><small>{{ submission.description }}</small>{% endif %}
+                  </div>
+                  {% elif submission.docker %}
+                  <div class="col-1">{% fa5_icon 'stream' 'fas' %}</div>
+                  <div class="col-8">
+                    {{ submission.docker }}<br>
+                    {% if submission.description %}<br><small>{{ submission.description }}</small>{% endif %}
+                  </div>
                   {% else %}
-                    {{ submission.runner }}
+                  <div class="col-9">None</div>
                   {% endif %}
+                  <div class="col-1">
+                    {% if submission.runner == 'PY' %}
+                      {% fa5_icon 'python' 'fab' %}
+                    {% elif submission.runner == 'DO' %}
+                      {% fa5_icon 'docker' 'fab' %}
+                    {% else %}
+                      {{ submission.runner }}
+                    {% endif %}
+                  </div>
+                  <div class="col-1 text-center">
+                    {% with "submission-"|addstr:submission.pk|addstr:"-status" as updateable_id %}
+                      {% updateable updateable_id div %}
+                        {% if submission.status == 'Q' %}
+                          {% fa5_icon 'clock' 'fas' color='DodgerBlue' %} {{ submission.queue }}
+                        {% elif submission.status == 'R' %}
+                          {% fa5_icon 'cog' 'fas' color='Orange' spin=True %}
+                        {% elif submission.status == 'D' %}
+                          {% fa5_icon 'check-circle' 'fas' color='ForestGreen' %}
+                        {% elif submission.status == 'E' %}
+                          {% fa5_icon 'times-circle' 'fas' color='red' %}
+                        {% else %}
+                          {{ submission.status }}
+                        {% endif %}
+                      {% endupdateable %}
+                    {% endwith %}
+                  </div>
                 </div>
-                <div class="col-1">
-                  {% with "submission-"|addstr:submission.pk|addstr:"-status" as updateable_id %}
-                    {% updateable updateable_id div %}
-                      {% if submission.status == 'Q' %}
-                        {% fa5_icon 'clock' 'fas' color='DodgerBlue' %}
-                      {% elif submission.status == 'R' %}
-                        {% fa5_icon 'cog' 'fas' color='Orange' spin=True %}
-                      {% elif submission.status == 'D' %}
-                        {% fa5_icon 'check-circle' 'fas' color='ForestGreen' %}
-                      {% elif submission.status == 'E' %}
-                        {% fa5_icon 'times-circle' 'fas' color='red' %}
-                      {% else %}
-                        {{ submission.status }}
-                      {% endif %}
-                    {% endupdateable %}
-                  {% endwith %}
-                </div>
-              </div>
-            </td>
-            <td class="align-middle">
-              {% with "submission-"|addstr:submission.pk|addstr:"-point" as updateable_id %}
-                {% updateable updateable_id div %}
-                {{ submission.point }}
-                {% endupdateable %}
-              {% endwith %}
-            </td>
-            <td class="align-middle">
-              <div id="submission-{{ submission.pk }}-notes-view">
-                {% with "submission-"|addstr:submission.pk|addstr:"-notes" as updateable_id %}
-                  {% updateable updateable_id div-submission %}
-                  {{ submission.notes }}
+              </td>
+              <td class="align-middle">
+                {% with "submission-"|addstr:submission.pk|addstr:"-point" as updateable_id %}
+                  {% updateable updateable_id div %}
+                  {{ submission.info | autolink }}
                   {% endupdateable %}
                 {% endwith %}
-              </div>
-            </td>
-            <td class="align-middle">{{ submission.created_at }}</td>
-          </tr>
+              </td>
+              <td class="align-middle">{{ submission.created_at }}</td>
+            </tr>
+            <tr class="collapsible">
+              <td colspan="10">
+                <div class="collapse" id="collapse-evaluation-{{submission.pk}}">
+                  <div class="card card-body">
+                    <div id="submission-{{ submission.pk }}-notes-view">
+                      {% with "submission-"|addstr:submission.pk|addstr:"-notes" as updateable_id %}
+                        {% updateable updateable_id div-submission %}
+                        {{ submission.notes }}
+                        {% endupdateable %}
+                      {% endwith %}
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center flex-wrap">
+        {% if submissions.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request page=1 %}" tabindex="-1">{% fa5_icon 'angle-double-left' 'fas' %}</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request page=submissions.previous_page_number %}" tabindex="-1">{% fa5_icon 'angle-left' 'fas' %}</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" href="#" tabindex="-1">{% fa5_icon 'angle-double-left' 'fas' %}</a>
+        </li>
+        <li class="page-item disabled">
+          <a class="page-link" href="#" tabindex="-1">{% fa5_icon 'angle-left' 'fas' %}</a>
+        </li>
+        {% endif %}
+        {% for l in  submissions.paginator.page_range %}
+          {% if l <= submissions.number|add:5 and l >= submissions.number|add:-5 %}
+            {% if l == submissions.number %}
+            <li class="page-item active">
+              <span class="page-link">
+                <span>{{forloop.counter}}</span>
+              </span>
+            </li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request page=forloop.counter %}">{{forloop.counter}}</a></li>
+            {% endif %}
+          {% endif %}
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
+        {% if submissions.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request page=submissions.next_page_number %}" tabindex="-1">{% fa5_icon 'angle-right' 'fas' %}</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request page=submissions.paginator.num_pages %}" tabindex="-1">{% fa5_icon 'angle-double-right' 'fas' %}</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" href="#" tabindex="-1">{% fa5_icon 'angle-right' 'fas' %}</a>
+        </li>
+        <li class="page-item disabled">
+          <a class="page-link" href="#" tabindex="-1">{% fa5_icon 'angle-double-right' 'fas' %}</a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+
+    <div class="text-center">
+      Show 
+      <select name="per_page" id="per_page">
+        {% for pp in per_page_options %}
+          {% if pp == submissions.paginator.per_page %}
+          ansdanda
+          <option selected="selected" value="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request per_page=pp page=1 %}">{{pp}}</option>
+            {% else %}
+          <option value="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request per_page=pp page=1 %}">{{pp}}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+      item(s) per page
+    </div>
+
+  </form>
+  <script type="text/javascript">
+    $("#per_page").change(function(e) {
+       window.location.href = $(this).val();
+    });
+
+    $(document).ready(function() {
+      $(document).on('click', '.clickable input', function(event){
+        event.stopPropagation();
+      });
+
+      $(document).on('click', '.clickable a', function(event){
+        event.stopPropagation();
+      });
+    });
+  </script>
 {% endblock %}

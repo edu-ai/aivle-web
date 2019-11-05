@@ -18,10 +18,12 @@
   {% can task.course request.user 'task.edit' as can_edit %}
 
   <h1>Leaderboard</h1>
+  <span>Top {{ submissions | length }}</span>
 
   <div class="mb-4">
     {% if can_edit %}
-      <a href="{% url 'leaderboard' task.course.pk task.pk %}?download" class="btn btn-success">{% fa5_icon 'file-excel' 'fas' %} Export to XLS</a>
+    <hr>
+    <a href="{% url 'leaderboard' task.course.pk task.pk %}?download" class="btn btn-success">{% fa5_icon 'file-excel' 'fas' %} Export to XLS</a>
     {% endif %}
   </div>
 
@@ -30,7 +32,9 @@
       <thead class="thead-inverse">
         <tr>
           <th>Rank</th>
+	  {% if can_edit %}
           <th>Username</th>
+	  {% endif %}
           <th>Name</th>
           <th>Point</th>
           <th>Created At</th>
@@ -40,7 +44,9 @@
         {% for submission in submissions %}
           <tr>
             <td class="align-middle">{{ forloop.counter }}</td>
+	    {% if can_edit %}
             <td class="align-middle">{{ submission.user }}</td>
+	    {% endif  %}
             <td class="align-middle">{{ submission.user.first_name }} {{ submission.user.last_name }}</td>
             <td class="align-middle">{{ submission.point }}</td>
             <td class="align-middle">{{ submission.created_at }}</td>
