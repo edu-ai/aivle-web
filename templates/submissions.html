@@ -146,21 +146,43 @@
   <form action="{% url 'submissions_action' %}" method="post">
     {% csrf_token %}
 
-    <ul class="button-list">
-      <li><a href="{% url 'submission_new' task.course.pk task.pk %}" class='btn {{ button_decorator }}'>{% fa5_icon 'plus-circle' 'fas' %} New submission</a></li>
-      {% if can_edit or task.leaderboard %}
-    	<li><a href="{% url 'leaderboard' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'crown' 'fas' %} Leaderboard</a></li>
-      {% endif %}
-      {% if can_view_all and not view_all %}
-      	<li><a href="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request others=1 %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Others</a></li>
-      {% endif %}
-      {% if can_view_all and view_all %}
-    	<li><a href="{% url 'submissions' task.course.pk task.pk %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Less</a></li>
-      {% endif %}
-      {% if can_rerun %}
-      <li><button type="submit" name="rerun" class="btn btn-info">{% fa5_icon 'cog' 'fas' %} Re-Run</button></li>
-      {% endif %}
-    </ul>
+    <div class="d-flex justify-content-between">
+      <div>
+         <ul class="button-list">
+            <li><a href="{% url 'submission_new' task.course.pk task.pk %}" class='btn {{ button_decorator }}'>{% fa5_icon 'plus-circle' 'fas' %} New submission</a></li>
+            {% if can_edit or task.leaderboard %}
+            <li><a href="{% url 'leaderboard' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'crown' 'fas' %} Leaderboard</a></li>
+            {% endif %}
+            {% if can_view_all and not view_all %}
+              <li><a href="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request others=1 %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Others</a></li>
+            {% endif %}
+            {% if can_view_all and view_all %}
+            <li><a href="{% url 'submissions' task.course.pk task.pk %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Less</a></li>
+            {% endif %}
+            {% if can_rerun %}
+            <li><button type="submit" name="rerun" class="btn btn-info">{% fa5_icon 'cog' 'fas' %} Re-Run</button></li>
+            {% endif %}
+          </ul>
+      </div>
+      <div>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Per Page</div>
+          </div>
+           <select name="per_page" id="per_page" class="custom-select">
+            {% for pp in per_page_options %}
+              {% if pp == submissions.paginator.per_page %}
+              ansdanda
+              <option selected="selected" value="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request per_page=pp page=1 %}">{{pp}}</option>
+                {% else %}
+              <option value="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request per_page=pp page=1 %}">{{pp}}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+    
    
     <div class="table-responsive">
       <table class="table">
@@ -181,15 +203,11 @@
         </thead>
         <tbody>
           {% for submission in submissions %}
-            {% with "submission-"|addstr:submission.pk|addstr:"-progress" as updateable_id %}
-            {% updateable updateable_id div %}
             {% if submission.status == 'R' %}
             <tr class="flash-box clickable collapsed" data-toggle="collapse" href="#collapse-evaluation-{{submission.pk}}" role="button" aria-expanded="false">
             {% else %}
             <tr class="clickable collapsed" data-toggle="collapse" href="#collapse-evaluation-{{submission.pk}}" role="button" aria-expanded="false">
             {% endif %}
-            {% endupdateable %}
-            {% endwith %}
               {% if can_edit %}
               <td class="align-middle">
                 <div class="row">
@@ -290,6 +308,7 @@
       </table>
     </div>
 
+    {% if submissions.paginator.num_pages > 1 %}
     <nav aria-label="Page navigation">
       <ul class="pagination justify-content-center flex-wrap">
         {% if submissions.has_previous %}
@@ -337,21 +356,7 @@
         {% endif %}
       </ul>
     </nav>
-
-    <div class="text-center">
-      Show 
-      <select name="per_page" id="per_page">
-        {% for pp in per_page_options %}
-          {% if pp == submissions.paginator.per_page %}
-          ansdanda
-          <option selected="selected" value="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request per_page=pp page=1 %}">{{pp}}</option>
-            {% else %}
-          <option value="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request per_page=pp page=1 %}">{{pp}}</option>
-          {% endif %}
-        {% endfor %}
-      </select>
-      item(s) per page
-    </div>
+    {% endif %}
 
   </form>
   <script type="text/javascript">
