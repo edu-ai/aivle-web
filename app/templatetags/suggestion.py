@@ -19,12 +19,15 @@ SUGGESTIONS = {
         'Please make sure to follow the submission guideline regarding the path to the Fast Downward.\
         For the Mini Project sample agent, the path is given in the <b>initialize</b> function.',
     r"pyenv: command not found": 
-        "The runner failed unexpectedly. Please contact the teaching staff to get the submission regraded.",
+        "The runner has failed unexpectedly. Please contact the teaching staff to get the submission regraded.",
     r'{"error": {"type": "RunnerError", "args": \[""\]}}':
         "Please make sure that you are aware of our system <a href='https://github.com/cs4246/meta/wiki/Known-Issues' target='_blank'>known issues</a>.",
     r'deterministic.+1\.|deterministic.+2\.|deterministic.+3\.|deterministic.+4\.|deterministic.+5\.|deterministic.+6\.|deterministic.+7\.': 
         "Please check that your loss function is correct. Make sure that you incorporate `dones` as it is required to correctly compute\
-        the Q function for the terminal states, since Q(s,a) = R(s,a) for a terminal state s and any arbitrary action a."
+        the Q function for the terminal states, since Q(s,a) = R(s,a) for a terminal state s and any arbitrary action a.\
+        Other reason might be because the proper gradient computation can't be computed due to the lack of continuity in the comptational graph.\
+        In that case, you might want to make sure that you operate directly in the PyTorch tensor, without copying or converting the tensor.\
+        Also, check the other function implementations for error as well."
 }
 
 @register.filter(is_safe=True)

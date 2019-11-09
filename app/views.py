@@ -13,6 +13,7 @@ from .funcs import can, submission_is_allowed, course_participations, course_par
 
 import os
 import xlwt
+import collections
 
 from django.http import HttpResponse
 from datetime import date, timedelta
@@ -233,28 +234,53 @@ def stats(request, course_pk, task_pk):
     successes = base.filter(status=Submission.STATUS_DONE).annotate(count=Count('id')).all()
     failures = base.filter(status=Submission.STATUS_ERROR).annotate(count=Count('id')).all()
 
+    points = []
+    max_point = int(base.aggregate(Max('point'))['point__max']) + 1
+    partition = max_point # 4
+    step_size = int(max_point/partition)
+    for p in range(0, max_point, step_size):
+        point = base.filter(point__range=(p, p+step_size-0.001)).annotate(count=Count('user')).all()
+        points.append(point)
+
     labels = [d['created_at'] for d in submissions]
 
-    sdate = date(*[int(i) for i in labels[0].split('-')])
-    edate = date(*[int(i) for i in labels[-1].split('-')])
+    sdate = task.opened_at.date() #date(*[int(i) for i in labels[0].split('-')])
+    edate = task.closed_at.date() # date(*[int(i) for i in labels[-1].split('-')])
     delta = edate - sdate
 
-    counts = {}
+    counts = collections.OrderedDict({})
     for i in range(delta.days + 1):
         day = sdate + timedelta(days=i)
-        counts[str(day)] = {'successes':0, 'failures':0}
+        counts[str(day)] = {'successes':0, 'failures':0, 'points': [0] * partition}
+
 
     for s in successes:
-        counts[s['created_at']]['successes'] = s['count']
+        if s['created_at'] in counts:
+            counts[s['created_at']]['successes'] = s['count']
     for s in failures:
-        counts[s['created_at']]['failures'] = s['count']
+        if s['created_at'] in counts:
+            counts[s['created_at']]['failures'] = s['count']
+    for p in range(0, max_point, step_size):
+        _sum = 0
+        for s in points[p]:
+            if s['created_at'] in counts:
+                _sum = s['count'] + _sum
+                counts[s['created_at']]['points'][p] = _sum
+        for i, day in enumerate(counts.keys()):
+            if day in counts and counts[day]['points'][p] < 1:
+                prev_day = list(counts.keys())[i-1]
+                counts[day]['points'][p] = counts[prev_day]['points'][p]
+
+    # TODO: per user points
 
     labels = []
-    data = {'successes': [], 'failures': []}
+    data = {'successes': [], 'failures': [], 'points': [[] for i in range(partition)]}
     for day, stat in counts.items():
         labels.append(day)
         data['successes'].append(stat['successes'])
         data['failures'].append(stat['failures'])
+        for p in range(0, max_point, step_size):
+            data['points'][p].append(stat['points'][p])
     data['successes_count'] = sum(data['successes'])
     data['failures_count'] = sum(data['failures'])
 

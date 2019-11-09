@@ -8,6 +8,7 @@ from rest_framework.routers import DefaultRouter
 from .models import Submission, Task
 from .serializers import SubmissionSerializer, TaskSerializer
 
+from itertools import groupby
 import json
 
 class JobViewSet(viewsets.ReadOnlyModelViewSet):
@@ -58,6 +59,18 @@ class TaskViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = (IsAdminUser,)
+
+    @action(detail=True, methods=['get'])
+    def submissions_by_user(self, request, pk):
+        if request.method == 'GET':
+            submissions = Task.objects.get(pk=pk).submissions.all()
+            key = lambda x: x.user
+            grouped_submissions = groupby(sorted(submissions, key=lambda x: x.user.username), key=key)
+            result = {}
+            for user, submissions in grouped_submissions:
+                serializer = SubmissionSerializer(submissions, many=True, context={'request': request})
+                result[user.username] = serializer.data
+            return Response(result)
 
 router = DefaultRouter()
 router.register(r'jobs', JobViewSet)
