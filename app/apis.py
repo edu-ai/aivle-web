@@ -5,8 +5,9 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework import viewsets
 from rest_framework.routers import DefaultRouter
 
-from .models import Submission, Task
-from .serializers import SubmissionSerializer, TaskSerializer
+from .models import Submission, Task, Similarity, User
+from .serializers import SubmissionSerializer, TaskSerializer, SimilaritySerializer, SimilaritySubmissionSerializer
+from .funcs import can
 
 from itertools import groupby
 import json
@@ -63,15 +64,60 @@ class TaskViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['get'])
     def submissions_by_user(self, request, pk):
         if request.method == 'GET':
-            submissions = Task.objects.get(pk=pk).submissions.all()
+            task = Task.objects.get(pk=pk)
+            submissions = task.submissions.all()
             key = lambda x: x.user
-            grouped_submissions = groupby(sorted(submissions, key=lambda x: x.user.username), key=key)
+            grouped_submissions = groupby(sorted(submissions, key=lambda x: x.user.pk), key=key)
             result = {}
             for user, submissions in grouped_submissions:
-                serializer = SubmissionSerializer(submissions, many=True, context={'request': request})
-                result[user.username] = serializer.data
+                if can(task.course, user, 'task.edit') or not user.is_active:
+                    continue
+                serializer = SimilaritySubmissionSerializer(submissions, many=True, context={'request': request})
+                result[user.pk] = serializer.data
             return Response(result)
+
+
+class SimilarityViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Similarity.objects.all()
+    serializer_class = SimilaritySerializer
+    permission_classes = (IsAdminUser,)
+
+    @action(detail=False, methods=['post'])
+    def set(self, request):
+        UPDATE_ALLOWED = ['score', 'diff']
+
+        json_data = json.loads(request.body)
+        try:
+            user = User.objects.get(pk=json_data.get('user_id'))
+            task = Task.objects.get(pk=int(json_data.get('task_id')))
+            submission = Submission.objects.get(pk=json_data.get('submission_id'))
+            related = Submission.objects.get(pk=json_data.get('related_id'))
+            similarity = Similarity.objects.get(user=user, task=task)
+        except (User.DoesNotExist, Task.DoesNotExist):
+            return Response(status=HTTP_404_NOT_FOUND)
+        except Similarity.DoesNotExist:
+            similarity = Similarity(user=user, task=task)
+
+        similarity.submission = submission
+        similarity.related = related
+
+        for key in UPDATE_ALLOWED:
+            setattr(similarity, key, json_data[key])
+
+        similarity.save()
+
+        serializer = self.get_serializer(similarity)
+        return Response(serializer.data)
+
+
+class SubmissionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Submission.objects.all()
+    serializer_class = SubmissionSerializer
+    permission_classes = (IsAdminUser,)
+
 
 router = DefaultRouter()
 router.register(r'jobs', JobViewSet)
 router.register(r'tasks', TaskViewSet)
+router.register(r'similarities', SimilarityViewSet)
+router.register(r'submissions', SubmissionViewSet)

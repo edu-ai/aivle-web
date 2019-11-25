@@ -139,6 +139,21 @@ def task_download(request, pk):
     return response
 
 @login_required
+def template_download(request, pk):
+    task = get_object_or_404(Task, pk=pk)
+    redirect_url = reverse('course', args=(task.course.pk,))
+
+    if not can(task.course, request.user, 'task.view'):
+        messages.error(request, 'You are not allowed to download this template.')
+        return redirect(redirect_url)
+
+    filename = os.path.basename(task.template.name)
+    response = HttpResponse(task.template, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+
+    return response
+
+@login_required
 def submissions(request, course_pk, task_pk):
     task = get_object_or_404(Task, pk=task_pk)
     redirect_url = reverse('course', args=(task.course.pk,))
@@ -213,12 +228,39 @@ def leaderboard(request, course_pk, task_pk):
         for i, s in enumerate(leaderboard_list):   
             sheet.write(i+1, 0, s.user.username)
             sheet.write(i+1, 1, s.point)
+            sheet.write(i+1, 2, '')
+            sheet.write(i+1, 3, 'Late submission' if s.is_late else '')
 
         wb.save(response)
         return response
 
 
     return render(request, 'leaderboard.html', {'task': task, 'submissions': leaderboard_list})
+
+@login_required
+def similarities(request, course_pk, task_pk):
+    task = get_object_or_404(Task, pk=task_pk)
+    redirect_url = reverse('submissions', args=(course_pk,task_pk))
+
+    if not can(task.course, request.user, 'task.edit') and not task.leaderboard:
+        messages.error(request, 'You don\'t have access similarities feature.')
+        return redirect(redirect_url)
+
+    similarities_ = task.similarities.order_by('-score', 'submission__created_at').all()
+    similarities = []
+    for s in similarities_.all():
+        if can(task.course, s.user, 'task.edit') or not s.user.is_active:
+            continue
+        similarities.append(s)
+
+    per_page_options = [10, 20, 50, 100, 1000]
+    per_page = request.GET.get('per_page', per_page_options[0])
+    paginator = Paginator(similarities, per_page) # Show 25 contacts per page
+    page = request.GET.get('page')
+    similarities = paginator.get_page(page)
+
+    return render(request, 'similarities.html', {'task': task, 'similarities': similarities,
+                                                'per_page_options': per_page_options})
 
 @login_required
 def stats(request, course_pk, task_pk):
@@ -302,6 +344,9 @@ def submission_new(request, course_pk, task_pk):
         if not submission_is_allowed(task, request.user):
             messages.error(request, 'Daily submission limit exceeded.')
             return redirect(redirect_url)
+
+    if task.is_late:
+        messages.warning(request, 'You are doing late submission. Your mark will be deducted according to the late submission policy.')
 
     submission = Submission(task=task, user=request.user)
     form = SubmissionForm(request.POST or None, request.FILES or None, instance=submission)

@@ -1,3 +1,7 @@
 td > .btn, td > form > .btn {
 	margin: 5px;
 }
+
+.container {
+	max-width: 1300px;
+}

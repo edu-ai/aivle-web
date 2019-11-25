@@ -36,6 +36,10 @@
           <th>Username</th>
 	  {% endif %}
           <th>Name</th>
+    {% if can_edit %}
+          <th>Submission</th>
+          <th>Size</th>
+    {% endif %}
           <th>Point</th>
           <th>Created At</th>
         </tr>
@@ -48,7 +52,11 @@
             <td class="align-middle">{{ submission.user }}</td>
 	    {% endif  %}
             <td class="align-middle">{{ submission.user.first_name }} {{ submission.user.last_name }}</td>
-            <td class="align-middle">{{ submission.point }}</td>
+      {% if can_edit %}
+            <td class="align-middle"><a href="{% url 'submission_download' submission.pk %}">{{ submission.filename }}</a></td>
+            <td class="align-middle">{{ submission.file.size | filesizeformat }}</td>
+      {% endif  %}
+            <td class="align-middle">{{ submission.point }} {% if submission.is_late %}<span class="badge badge-danger">Late</span>{% endif %}</td>
             <td class="align-middle">{{ submission.created_at }}</td>
           </tr>
         {% endfor %}

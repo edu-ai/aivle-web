@@ -1,12 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
-from .models import Course, Task, Submission, Participation
+from .models import Course, Task, Submission, Participation, Similarity
 
 admin.site.register(Course)
 admin.site.register(Task)
 admin.site.register(Submission)
 admin.site.register(Participation)
+admin.site.register(Similarity)
 
 admin.site.unregister(User)
 @admin.register(User)

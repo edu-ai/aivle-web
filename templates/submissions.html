@@ -156,6 +156,9 @@
             {% endif %}
             {% if can_edit %}
             <li><a href="{% url 'stats' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'signal' 'fas' %} Stats</a></li>
+              {% if task.template %}
+              <li><a href="{% url 'similarities' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'copy' 'fas' %} Similarities</a></li>
+              {% endif %}
             {% endif %}
             {% if can_view_all and not view_all %}
               <li><a href="{% url 'submissions' task.course.pk task.pk %}?{% query_transform request others=1 %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Others</a></li>
@@ -164,7 +167,7 @@
             <li><a href="{% url 'submissions' task.course.pk task.pk %}" class="btn btn-info">{% fa5_icon 'list-ul' 'fas' %} View Less</a></li>
             {% endif %}
             {% if can_rerun %}
-            <li><button type="submit" name="rerun" class="btn btn-info">{% fa5_icon 'cog' 'fas' %} Re-Run</button></li>
+            <li><button type="submit" name="rerun" class="btn btn-info">{% fa5_icon 'redo' 'fas' %} Re-Run</button></li>
             {% endif %}
           </ul>
       </div>
@@ -289,6 +292,7 @@
                   {{ submission.info | autolink }}
                   {% endupdateable %}
                 {% endwith %}
+                {% if submission.is_late %}<span class="badge badge-danger">Late</span>{% endif %}
               </td>
               <td class="align-middle">{{ submission.created_at }}</td>
             </tr>

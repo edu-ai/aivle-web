@@ -92,3 +92,5 @@ uploads
 
 *.bak
 *.swp
+
+db.sqlite*

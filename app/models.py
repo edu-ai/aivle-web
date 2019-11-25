@@ -113,12 +113,16 @@ class Task(models.Model):
     file = ExtraFileField(upload_to=task_path, after_file_save=compute_file_hash)
     file_hash = models.CharField(max_length=255)
 
+    template = models.FileField(upload_to=task_path, blank=True, null=True)
+    template_file = models.CharField(max_length=255, blank=True, null=True)
+
     daily_submission_limit = models.PositiveSmallIntegerField(default=DEFAULT_DAILY_SUBMISSIONS_LIMIT)
     max_upload_size = models.IntegerField(default=DEFAULT_MAX_UPLOAD_SIZE)
     run_time_limit = models.IntegerField(default=DEFAULT_RUN_TIME_LIMIT)
     max_image_size = models.IntegerField(default=DEFAULT_MAX_IMAGE_SIZE)
 
     opened_at = models.DateTimeField(blank=True, null=True)
+    deadline_at = models.DateTimeField(blank=True, null=True)
     closed_at = models.DateTimeField(blank=True, null=True)
 
     leaderboard = models.BooleanField(default=False)
@@ -133,6 +137,12 @@ class Task(models.Model):
         return "{}".format(self.name)
 
     @property
+    def deadline(self):
+        if self.deadline_at:
+            return self.deadline_at
+        return self.closed_at
+
+    @property
     def is_open(self):
         if self.opened_at and self.opened_at > timezone.now():
             return False
@@ -141,12 +151,18 @@ class Task(models.Model):
         return True
 
     @property
+    def is_late(self):
+        return self.deadline_at and self.deadline_at < timezone.now()
+
+    @property
     def is_dead(self):
         return self.closed_at and self.closed_at < timezone.now()
 
     def get_status_display(self):
         if self.is_dead:
             return "Closed"
+        if self.is_late:
+            return "Late"
         return "Open" if self.is_open else "Scheduled"
 
     @property
@@ -220,6 +236,22 @@ class Submission(models.Model):
     def queue(self):
         return Submission.objects.filter(status=Submission.STATUS_QUEUED, created_at__lte=self.created_at).count()
 
+    @property
+    def is_late(self):
+        return self.created_at > self.task.deadline
+
     def __str__(self):
         return "{}:{} - {} - {} AY{} Sem{}".format(self.user, self.pk, self.task.name, 
             self.task.course.code, self.task.course.academic_year, self.task.course.semester)
+
+
+class Similarity(models.Model):
+    class Meta:
+        unique_together = (('user', 'task', 'submission', 'related'),)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='similarities')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='similarities')
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='similarity')
+    related = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='similarities')
+    score = models.DecimalField(max_digits=9, decimal_places=3)
+    diff = models.TextField(blank=True, null=True)

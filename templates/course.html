@@ -50,7 +50,10 @@
               <a href="{% url 'submissions' course.pk task.pk %}">{{ task.name }}</a>
               <small class="text-muted d-block">{{ task.description |slice:":80" }}</small>
             </td>
-            <td class="align-middle">{{ task.closed_at }}</td>
+            <td class="align-middle">
+              {{ task.deadline }}
+              {% if task.deadline != task.closed_at %}<br><small class="text-muted d-block">Closed: {{ task.closed_at }}</small>{% endif %}
+            </td>
             <td class="align-middle">{{ task.opened_at }}</td>
             <td class="align-middle">{{ task.get_status_display }}</td>
             {% if can_edit or can_delete %}
