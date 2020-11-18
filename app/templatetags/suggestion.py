@@ -18,7 +18,7 @@ SUGGESTIONS = {
     r"fast-downward.py: not found|fast-downward.py: Permission denied": 
         'Please make sure to follow the submission guideline regarding the path to the Fast Downward.\
         For the Mini Project sample agent, the path is given in the <b>initialize</b> function.',
-    r"pyenv: command not found": 
+    r"pyenv: command not found|SuiteInstallError|RunnerInstallError": 
         "The runner has failed unexpectedly. Please contact the teaching staff to get the submission regraded.",
     r'{"error": {"type": "RunnerError", "args": \[""\]}}':
         "Please make sure that you are aware of our system <a href='https://github.com/cs4246/meta/wiki/Known-Issues' target='_blank'>known issues</a>.",
@@ -30,6 +30,16 @@ SUGGESTIONS = {
         Also, check the other function implementations for error as well."
 }
 
+EXTRA = "<hr><b>Before asking questions</b>, please make sure that you have:\
+<ol>\
+    <li>Tried hard to figure out the source of the error</li>\
+    <li>Followed the suggestion given by aiVLE</li>\
+    <li>Read the clarifications thread in Luminus carefully</li>\
+    <li>Search the Luminus forum for a potential fix</li>\
+</ol>\
+Please present the <i>details</i> of the error, a <i>summary</i> on what you have tried, and your <i>conjecture</i> regarding the problem.\
+"
+
 @register.filter(is_safe=True)
 def suggestion(value):
     if value is None:
@@ -37,10 +47,10 @@ def suggestion(value):
     for k, v in SUGGESTIONS.items():
         matches = re.findall(k, value)
         if matches:
-            return mark_safe(v)
+            return mark_safe(v + EXTRA)
     for k, v in AUTOLINKS.items():
         if k in value:
-            return mark_safe('Please refer to {}.'.format(wrap_link(k, v)))
+            return mark_safe('Please refer to {}.'.format(wrap_link(k, v)) + EXTRA)
     if re.findall(r"Error|error", value):
-        return 'Please read the error message carefully and fix accordingly.'
+        return mark_safe('Please read the error message carefully and fix accordingly. Also, make sure that you have tested your agent locally with the original ``test`` function given in the agent template.' + EXTRA)
     return None

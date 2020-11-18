@@ -7,6 +7,7 @@ from django.core.files.storage import default_storage
 import os
 import hashlib
 import json
+import re
 
 class ExtraFileField(models.FileField):
     def __init__(self, verbose_name=None, name=None, upload_to='', after_file_save=None, storage=None, **kwargs):
@@ -107,7 +108,7 @@ class Task(models.Model):
     DEFAULT_RUN_TIME_LIMIT = 60 # Second
     DEFAULT_MAX_IMAGE_SIZE = 1000000 # KB
 
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
 
     file = ExtraFileField(upload_to=task_path, after_file_save=compute_file_hash)
@@ -162,7 +163,7 @@ class Task(models.Model):
         if self.is_dead:
             return "Closed"
         if self.is_late:
-            return "Late"
+            return "Ended"
         return "Open" if self.is_open else "Scheduled"
 
     @property
@@ -228,6 +229,11 @@ class Submission(models.Model):
     @property
     def info(self):
         try:
+            if self.notes is not None:
+                notes = self.notes.replace('\\n',' ')
+                for er in ['Error', 'Exception', 'error']:
+                     if er in notes:
+                        return re.findall(r'(\w*%s\w*)' % er, notes)[-1] # return the last one
             return json.loads(self.notes)['error']['type']
         except:
             return self.point
@@ -238,7 +244,9 @@ class Submission(models.Model):
 
     @property
     def is_late(self):
-        return self.created_at > self.task.deadline
+        if self.task.deadline:
+            return self.created_at > self.task.deadline
+        return False
 
     def __str__(self):
         return "{}:{} - {} - {} AY{} Sem{}".format(self.user, self.pk, self.task.name, 
@@ -255,3 +263,28 @@ class Similarity(models.Model):
     related = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='similarities')
     score = models.DecimalField(max_digits=9, decimal_places=3)
     diff = models.TextField(blank=True, null=True)
+
+
+class Announcement(models.Model):
+    TYPE_SUCCESS = 'success'
+    TYPE_INFO = 'info'
+    TYPE_WARNING = 'warning'
+    TYPE_DANGER = 'danger'
+    TYPES = [
+        (TYPE_SUCCESS, 'Success'),
+        (TYPE_INFO, 'Info'),
+        (TYPE_WARNING, 'Warning'),
+        (TYPE_DANGER, 'Danger')
+    ]
+
+    name = models.CharField(max_length=255)
+    type = models.CharField(
+        max_length=7,
+        choices=TYPES,
+        default=TYPE_INFO,
+    )
+    text = models.TextField()
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return "{} - {} [active={}]".format(self.type, self.name, self.active)

@@ -21,10 +21,23 @@
   <span>Top {{ submissions | length }}</span>
 
   <div class="mb-4">
-    {% if can_edit %}
     <hr>
+    {% if can_edit %}
     <a href="{% url 'leaderboard' task.course.pk task.pk %}?download" class="btn btn-success">{% fa5_icon 'file-excel' 'fas' %} Export to XLS</a>
     {% endif %}
+    <a class="btn btn-primary" id="distribution-button" data-toggle="collapse" href="#distribution" role="button" aria-expanded="false">{% fa5_icon 'chart-bar' 'fas' %} Show Distribution</a>
+  </div>
+
+  <div id="distribution" class="collapse">
+    <div style="height: 300px">
+      <canvas id="leaderboard-distribution-chart" style="min-height: 300px; height: 300px" height="300"></canvas>
+    </div> 
+    <div class="card">
+      <div class="card-body text-center">
+        Mean: {{ stats.mean }} &nbsp;|&nbsp; Median: {{ stats.median }} &nbsp;|&nbsp; 25th-75th Percentile: {{ stats.quantiles.0 }}-{{ stats.quantiles.1 }}
+      </div>
+    </div>
+    <br>
   </div>
 
   <div class="table-responsive">
@@ -63,4 +76,62 @@
       </tbody>
     </table>
   </div>
+
+
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+  <script type="text/javascript">
+    new Chart(document.getElementById("leaderboard-distribution-chart"), {
+      type: 'bar',
+      data: {
+        labels: {{ stats.labels|safe }},
+        datasets: [
+          { 
+            data: {{ stats.distribution }},
+            label: 'Percentage',
+            borderColor: "#27ae60",
+            backgroundColor: "#2ecc71"
+          },
+        ]
+      },
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        legend: {
+                display: false
+             },
+        scales: {
+                yAxes: [{
+                    ticks: {
+                       min: 0,
+                       max: 100,
+                       callback: function(value) {
+                           return value + "%"
+                       }
+                    },
+                    scaleLabel: {
+                       display: true,
+                       labelString: "Percentage"
+                    },
+                    stacked: true
+                }]
+            }
+      }
+    });
+
+    $('#distribution').on('show.bs.collapse', function () {
+       $('#distribution-button').html('{% fa5_icon 'chart-bar' 'fas' %} Hide Distribution');
+    });
+    $('#distribution').on('hide.bs.collapse', function () {
+       $('#distribution-button').html('{% fa5_icon 'chart-bar' 'fas' %} Show Distribution');
+    });
+
+    $(document).ready(function () {
+        if(location.hash != null && location.hash != ""){
+            $('.collapse').removeClass('in');
+            $(location.hash + '.collapse').collapse('show');
+        }
+    });
+  </script>
 {% endblock %}

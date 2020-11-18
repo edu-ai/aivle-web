@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv
+load_dotenv(verbose=True)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'PLEASE_CHANGE_THIS_TO_YOUR_SECRET_KEY'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -167,7 +169,7 @@ ROLES_TASK_VIEW             = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
 ROLES_TASK_SUBMIT           = ['STU', 'TA', 'LEC', 'ADM']
 ROLES_TASK_EDIT             = ['TA', 'LEC', 'ADM']
 ROLES_TASK_DELETE           = ['LEC', 'ADM']
-ROLES_TASK_DOWNLOAD         = ['LEC', 'ADM']
+ROLES_TASK_DOWNLOAD         = ['LEC', 'ADM', 'TA']
 ROLES_SUBMISSION_DOWNLOAD   = ['LEC', 'ADM', 'TA']
 ROLES_SUBMISSION_VIEW       = ['LEC', 'ADM', 'TA']
 ROLES_SUBMISSION_RERUN      = ['LEC', 'ADM', 'TA']
@@ -215,7 +217,3 @@ class LuminusOAuthConfig:
     class Redirect:
         authorization = None
         access_token  = None
-
-# Announcement
-
-ANNOUNCEMENT_URL = 'https://raw.githubusercontent.com/wiki/cs4246/meta/Announcements.md'

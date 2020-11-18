@@ -151,6 +151,9 @@
       <div>
          <ul class="button-list">
             <li><a href="{% url 'submission_new' task.course.pk task.pk %}" class='btn {{ button_decorator }}'>{% fa5_icon 'plus-circle' 'fas' %} New submission</a></li>
+            {% if task.template %}
+            <li><a href="{% url 'template_download' task.pk %}" class='btn {{ button_decorator }} btn-secondary'>{% fa5_icon 'download' 'fas' %} Download Template</a></li>
+            {% endif %}
             {% if can_edit or task.leaderboard %}
             <li><a href="{% url 'leaderboard' task.course.pk task.pk %}" class="btn btn-success">{% fa5_icon 'crown' 'fas' %} Leaderboard</a></li>
             {% endif %}
@@ -204,6 +207,7 @@
             <th>Name</th>
             {% endif %}
             <th>Submission</th>
+            <th>Size</th>
             <th>Verdict</th>
             <th>Created At</th>
           </tr>
@@ -211,9 +215,9 @@
         <tbody>
           {% for submission in submissions %}
             {% if submission.status == 'R' %}
-            <tr class="flash-box clickable collapsed" data-toggle="collapse" href="#collapse-evaluation-{{submission.pk}}" role="button" aria-expanded="false">
+            <tr class="flash-box clickable collapsed" data-toggle="collapse" href="#collapse-evaluation-{{submission.pk}}" role="button" aria-expanded="false" data-tooltip="tooltip" data-placement="bottom" title="Click to expand">
             {% else %}
-            <tr class="clickable collapsed" data-toggle="collapse" href="#collapse-evaluation-{{submission.pk}}" role="button" aria-expanded="false">
+            <tr class="clickable collapsed" data-toggle="collapse" href="#collapse-evaluation-{{submission.pk}}" role="button" aria-expanded="false" data-tooltip="tooltip" data-placement="bottom" title="Click to expand / contract">
             {% endif %}
               {% if can_edit %}
               <td class="align-middle">
@@ -286,6 +290,7 @@
                   </div>
                 </div>
               </td>
+              <td class="align-middle">{{ submission.file.size | filesizeformat }}</td>
               <td class="align-middle">
                 {% with "submission-"|addstr:submission.pk|addstr:"-point" as updateable_id %}
                   {% updateable updateable_id div %}
@@ -388,6 +393,8 @@
       $(document).on('click', '.clickable a', function(event){
         event.stopPropagation();
       });
+
+      $('[data-tooltip="tooltip"]').tooltip();
     });
   </script>
 {% endblock %}

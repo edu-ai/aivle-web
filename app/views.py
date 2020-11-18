@@ -10,10 +10,13 @@ from django.db.models import Count
 from .models import Course, Task, Submission, Participation
 from .forms import TaskForm, SubmissionForm, CourseForm, RegisterForm
 from .funcs import can, submission_is_allowed, course_participations, course_participation
+from . import utils
 
 import os
 import xlwt
 import collections
+import math
+import statistics
 
 from django.http import HttpResponse
 from datetime import date, timedelta
@@ -205,14 +208,33 @@ def leaderboard(request, course_pk, task_pk):
     # Hack: otherwise will output multiple same user if got the same point on multiple submissions
     leaderboard_list, users = [], {}
     for s in submissions.all():
-        if can(task.course, s.user, 'task.edit') or not s.user.is_active:
+        if can(task.course, s.user, 'task.edit'):# or not s.user.is_active:
             continue
         if s.user.id not in users:
             users[s.user.id] = True
             leaderboard_list.append(s)
 
-    if not can(task.course, request.user, 'task.edit'):
-        leaderboard_list = leaderboard_list[:20] # show only 20 submissions
+    # Compute distribution
+    points = [float(s.point) for s in leaderboard_list]
+    max_point = int(max(points))
+    partition = max_point # 4
+    step_size = int(max_point/partition)
+    labels = [i*step_size for i in range(partition+1)]
+    distribution = [0 for _ in range(partition+1)]
+    for s in leaderboard_list:
+        p = math.floor(float(s.point)/float(step_size))
+        distribution[p] += 1
+
+    distribution = [round(x_i / len(leaderboard_list) * 100, 2) for x_i in distribution]
+
+    stats = {'labels': labels, 'distribution': distribution, 
+             'mean': round(statistics.mean(points) ,2), 'median': round(statistics.median(points), 2),
+             'quantiles': [round(x, 2) for x in utils.quantiles(points, percents=[0.25, 0.75])] }
+
+    student_view = 'student_view' in request.GET
+    if not can(task.course, request.user, 'task.edit') or student_view:
+        n_show = max(int(len(leaderboard_list) * 0.5), 20)
+        leaderboard_list = leaderboard_list[:n_show] # show only half the submissions
 
     if 'download' in request.GET:
         response = HttpResponse(content_type='application/ms-excel')
@@ -234,8 +256,7 @@ def leaderboard(request, course_pk, task_pk):
         wb.save(response)
         return response
 
-
-    return render(request, 'leaderboard.html', {'task': task, 'submissions': leaderboard_list})
+    return render(request, 'leaderboard.html', {'task': task, 'submissions': leaderboard_list, 'stats': stats})
 
 @login_required
 def similarities(request, course_pk, task_pk):

@@ -1,12 +1,9 @@
-from .models import Participation, Course
+from .models import Participation, Course, Announcement
 from .forms import CourseForm
 from django.conf import settings
 from django.utils import timezone
 from collections import namedtuple
 from cachetools import cached, TTLCache
-
-import urllib.request
-import re
 
 
 CourseParticipation = namedtuple('CourseParticipation', ['course', 'participation', 'added', 'joined', 'form'], defaults=(None,) * 5)
@@ -21,8 +18,11 @@ def can(course, user, action, participation=None, submission=None):
 
 
 def submission_is_allowed(task, user):
+    daily_submission_limit = task.daily_submission_limit
+    if task.daily_submission_limit and user.groups.filter(name='Debugger').exists():
+        daily_submission_limit += 3
     user_today_submissions = task.submissions.filter(user=user).filter(created_at__gt=timezone.localtime(timezone.now()).date())
-    return task.daily_submission_limit and user_today_submissions.count() < task.daily_submission_limit
+    return task.daily_submission_limit and user_today_submissions.count() < daily_submission_limit
 
 
 def serialize_submission(s):
@@ -42,10 +42,10 @@ def serialize_submission(s):
 @cached(cache=TTLCache(maxsize=1024, ttl=60*60))
 def get_course_roles_from_luminus(user):
     # DUMMY, replace with API call to luminus
+    courses = [Course.objects.order_by('-id')[0]] # get the latest course
     roles = [Participation.ROLE_STUDENT]
     course_roles = []
-    for i, code in enumerate(['CS4246']):
-        course = Course(code=code, academic_year="2019/2020", semester=1)
+    for i, course in enumerate(courses):
         role = roles[i % len(roles)]
         course_roles.append((course, role))
     return course_roles
@@ -86,19 +86,8 @@ def course_participation(user, course):
     return cp
 
 
-@cached(cache=TTLCache(maxsize=1024, ttl=10*60))
-def get_announcements(): # [ (announcement, type) ]
-    try:
-        announcements = urllib.request.urlopen(settings.ANNOUNCEMENT_URL).read().decode('utf-8').replace('*','').split('\n')
-        if len(announcements) == 1 and announcements[0] == ' ':
-            return []
-        announcements_types = []
-        for announcement in announcements:
-            try:
-                alert_type = re.findall(r"<!-- (.+) -->", announcement, re.MULTILINE)[0]
-                announcements_types.append((announcement, alert_type))
-            except:
-                announcements_types.append((announcement, 'alert-primary'))
-        return announcements_types
-    except:
-        return []
+def get_announcements():
+    announcements = Announcement.objects.all()
+    for announcement in announcements:
+        if not announcement.active: continue
+        yield (announcement.text, 'alert-' + announcement.type)

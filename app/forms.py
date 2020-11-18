@@ -131,6 +131,6 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = User
         labels = {
-            "username": "Student ID",
+            "username": "Student ID (AXXXXXXXX)",
         }
         fields = ("username", "email", "first_name", "last_name")

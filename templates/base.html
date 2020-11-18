@@ -24,7 +24,12 @@
 
     <nav class="navbar navbar-expand-md navbar-dark bg-primary">
       <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">{% fa5_icon 'robot' 'fas' %} &nbsp;aiVLE</a>
+	{% now "m-d" as cdate %}
+        {% if cdate == '02-12' or cdate == '02-13' or cdate == '02-14' %}
+        	<a class="navbar-brand" href="{% url 'home' %}">{% fa5_icon 'robot' 'fas' %} &nbsp;愛VLE</a>
+        {% else %}
+		<a class="navbar-brand" href="{% url 'home' %}">{% fa5_icon 'robot' 'fas' %} &nbsp;aiVLE</a>
+        {% endif %}
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsingNavbar" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -32,7 +37,7 @@
           <ul class="navbar-nav">
           </ul>
           <ul class="navbar-nav ml-auto">
-            {% if user.is_superuser %}
+            {% if user.is_staff %}
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
               </li>
