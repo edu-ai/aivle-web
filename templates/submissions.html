@@ -290,7 +290,7 @@
                   </div>
                 </div>
               </td>
-              <td class="align-middle">{{ submission.file.size | filesizeformat }}</td>
+	      <td class="align-middle">{{ submission.file_size | filesizeformat }}</td>
               <td class="align-middle">
                 {% with "submission-"|addstr:submission.pk|addstr:"-point" as updateable_id %}
                   {% updateable updateable_id div %}

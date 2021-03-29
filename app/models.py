@@ -225,6 +225,13 @@ class Submission(models.Model):
     @property
     def file_url(self):
         return reverse('submission_download', args=(self.task.course.pk,self.task.pk, self.pk))
+    
+    @property
+    def file_size(self):
+        try:
+            return self.file.size
+        except:
+            return None
 
     @property
     def info(self):

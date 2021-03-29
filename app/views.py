@@ -213,6 +213,9 @@ def leaderboard(request, course_pk, task_pk):
         if s.user.id not in users:
             users[s.user.id] = True
             leaderboard_list.append(s)
+    
+    if len(leaderboard_list) == 0:
+        return render(request, 'leaderboard.html', {'task': task, 'submissions': leaderboard_list, 'stats': {} })
 
     # Compute distribution
     points = [float(s.point) for s in leaderboard_list]
