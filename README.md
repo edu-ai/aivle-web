@@ -26,6 +26,8 @@ Install the requirements
 pip install -r requirements.txt
 ```
 
+Create your secret key and store it in ``.env`` as ``SECRET_KEY=<Your Key>``.
+
 Migrate and create the superuser
 ```
 python manage.py makemigrations

@@ -58,6 +58,7 @@ class Course(models.Model):
     code = models.CharField(max_length=6)
     academic_year = models.CharField(max_length=30)
     semester = models.PositiveSmallIntegerField()
+    visible = models.BooleanField(default=True)
     participants = models.ManyToManyField(
         User,
         through='Participation',

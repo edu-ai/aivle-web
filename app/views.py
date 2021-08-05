@@ -301,7 +301,8 @@ def stats(request, course_pk, task_pk):
     failures = base.filter(status=Submission.STATUS_ERROR).annotate(count=Count('id')).all()
 
     points = []
-    max_point = int(base.aggregate(Max('point'))['point__max']) + 1
+    max_point = base.aggregate(Max('point'))['point__max'] or 0
+    max_point = int() + 1
     partition = max_point # 4
     step_size = int(max_point/partition)
     for p in range(0, max_point, step_size):
