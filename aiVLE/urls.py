@@ -16,8 +16,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
+from rest_framework.routers import DefaultRouter
 
 from app import views, apis
+from app.apis import JobViewSet, TaskViewSet, SimilarityViewSet, SubmissionViewSet
+
+router = DefaultRouter()
+router.register(r'jobs', JobViewSet)
+router.register(r'tasks', TaskViewSet)
+router.register(r'similarities', SimilarityViewSet)
+router.register(r'submissions', SubmissionViewSet)
 
 urlpatterns = [
     url(r'^$', views.courses, name='home'),
@@ -29,21 +37,22 @@ urlpatterns = [
     url(r'^courses/(?P<course_pk>\d+)/join/$', views.course_join, name='course_join'),
 
     url(r'^courses/(?P<course_pk>\d+)/tasks/new/$', views.task_edit, name='task_new'),
-	url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/edit/$', views.task_edit, name='task_edit'),
+    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/edit/$', views.task_edit, name='task_edit'),
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/delete/$', views.task_delete, name='task_delete'),
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/leaderboard/$', views.leaderboard, name='leaderboard'),
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/stats/$', views.stats, name='stats'),
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/similarities/$', views.similarities, name='similarities'),
 
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/submissions/$', views.submissions, name='submissions'),
-    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/submissions/new/$', views.submission_new, name='submission_new'),
+    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/submissions/new/$', views.submission_new,
+        name='submission_new'),
 
     url(r'^tasks/(?P<pk>\d+)/download/$', views.task_download, name='task_download'),
     url(r'^tasks/(?P<pk>\d+)/template/$', views.template_download, name='template_download'),
     url(r'^submissions/(?P<pk>\d+)/download/$', views.submission_download, name='submission_download'),
     url(r'^submissions/action/$', views.submissions_action, name='submissions_action'),
 
-    path('api/v1/', include(apis.router.urls)),
+    path('api/v1/', include(router.urls)),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
 
