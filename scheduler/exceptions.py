@@ -1,0 +1,2 @@
+class UnsupportedMethodError(Exception):
+    pass

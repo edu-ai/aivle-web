@@ -1,18 +1,9 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.http import JsonResponse
-from django.shortcuts import render
-
 
 # Create your views here.
-def index(request):
-    return render(request, 'chat/index.html')
-
-
-def room(request, room_name):
-    return render(request, 'chat/room.html', {
-        'room_name': room_name
-    })
+from scheduler.models import Worker
 
 
 def send_to_channel(request):
@@ -24,6 +15,20 @@ def send_to_channel(request):
         {
             "type": "chat_message",
             "message": message
+        }
+    )
+    return JsonResponse(data={
+        "status": "success"
+    })
+
+
+def shutdown_worker_by_name(request):
+    worker_name = request.GET.get("name")
+    w = Worker.objects.get(name=worker_name)
+    async_to_sync(get_channel_layer().send)(
+        w.channel_name,
+        {
+            "type": "worker.close"
         }
     )
     return JsonResponse(data={

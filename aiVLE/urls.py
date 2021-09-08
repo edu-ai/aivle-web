@@ -58,5 +58,5 @@ urlpatterns = [
 
     url(r'^signup/$', views.signup, name='signup'),
 
-    path('scheduler/', include('scheduler.urls'))
+    path('scheduler/', include('scheduler.urls'))  # TODO: remove test URLs
 ]
