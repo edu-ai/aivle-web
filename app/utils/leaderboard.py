@@ -1,6 +1,7 @@
 import math
 
-def percentile(N, percent, key=lambda x:x):
+
+def percentile(N, percent, key=lambda x: x):
     """
     Find the percentile of a list of values.
 
@@ -12,14 +13,15 @@ def percentile(N, percent, key=lambda x:x):
     """
     if not N:
         return None
-    k = (len(N)-1) * percent
+    k = (len(N) - 1) * percent
     f = math.floor(k)
     c = math.ceil(k)
     if f == c:
         return key(N[int(k)])
-    d0 = key(N[int(f)]) * (c-k)
-    d1 = key(N[int(c)]) * (k-f)
-    return d0+d1
+    d0 = key(N[int(f)]) * (c - k)
+    d1 = key(N[int(c)]) * (k - f)
+    return d0 + d1
+
 
 def quantiles(N, percents):
     N = sorted(N)

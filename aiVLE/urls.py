@@ -57,4 +57,6 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
 
     url(r'^signup/$', views.signup, name='signup'),
+
+    path('scheduler/', include('scheduler.urls'))
 ]

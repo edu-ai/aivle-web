@@ -7,6 +7,7 @@ from django.contrib.auth import login, authenticate
 from django.core.paginator import Paginator
 from django.db.models import Count
 
+import app.utils.leaderboard
 from .models import Course, Task, Submission, Participation
 from .forms import TaskForm, SubmissionForm, CourseForm, RegisterForm
 from .funcs import can, submission_is_allowed, course_participations, course_participation
@@ -232,7 +233,7 @@ def leaderboard(request, course_pk, task_pk):
 
     stats = {'labels': labels, 'distribution': distribution, 
              'mean': round(statistics.mean(points) ,2), 'median': round(statistics.median(points), 2),
-             'quantiles': [round(x, 2) for x in utils.quantiles(points, percents=[0.25, 0.75])] }
+             'quantiles': [round(x, 2) for x in app.utils.leaderboard.quantiles(points, percents=[0.25, 0.75])]}
 
     student_view = 'student_view' in request.GET
     if not can(task.course, request.user, 'task.edit') or student_view:

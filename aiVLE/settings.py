@@ -47,9 +47,12 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'fontawesome_5',
     'rest_framework',
+    'rest_framework.authtoken',
     'prettyjson',
     'updateable',
     'app',
+    'scheduler',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -86,6 +89,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'aiVLE.wsgi.application'
+# Channels
+ASGI_APPLICATION = 'aiVLE.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 
 # Database
@@ -205,6 +218,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     )
 }
 
