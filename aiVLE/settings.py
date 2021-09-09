@@ -11,12 +11,13 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+
 from dotenv import load_dotenv
+
 load_dotenv(verbose=True)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -27,11 +28,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['cs4246.comp.nus.edu.sg', 'cs4246-i.comp.nus.edu.sg', '127.0.0.1']
-
+ALLOWED_HOSTS = ['cs4246.comp.nus.edu.sg', 'cs4246-i.comp.nus.edu.sg', '127.0.0.1', 'localhost']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-
 
 # Application definition
 
@@ -53,14 +52,21 @@ INSTALLED_APPS = [
     'app',
     'scheduler',
     'channels',
+    'dj_rest_auth',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth.registration',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'app.middleware.SupportBasicAuthMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -99,7 +105,7 @@ CHANNEL_LAYERS = {
         },
     },
 }
-
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"  # Reference:
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -110,7 +116,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -130,7 +135,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -143,7 +147,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
@@ -177,18 +180,18 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Permissions
 
-ROLES_COURSE_ADD            = ['LEC', 'ADM']
-ROLES_COURSE_DELETE         = ['LEC', 'ADM']
-ROLES_COURSE_VIEW           = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
-ROLES_COURSE_JOIN           = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
-ROLES_TASK_VIEW             = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
-ROLES_TASK_SUBMIT           = ['STU', 'TA', 'LEC', 'ADM']
-ROLES_TASK_EDIT             = ['TA', 'LEC', 'ADM']
-ROLES_TASK_DELETE           = ['LEC', 'ADM']
-ROLES_TASK_DOWNLOAD         = ['LEC', 'ADM', 'TA']
-ROLES_SUBMISSION_DOWNLOAD   = ['LEC', 'ADM', 'TA']
-ROLES_SUBMISSION_VIEW       = ['LEC', 'ADM', 'TA']
-ROLES_SUBMISSION_RERUN      = ['LEC', 'ADM', 'TA']
+ROLES_COURSE_ADD = ['LEC', 'ADM']
+ROLES_COURSE_DELETE = ['LEC', 'ADM']
+ROLES_COURSE_VIEW = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
+ROLES_COURSE_JOIN = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
+ROLES_TASK_VIEW = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
+ROLES_TASK_SUBMIT = ['STU', 'TA', 'LEC', 'ADM']
+ROLES_TASK_EDIT = ['TA', 'LEC', 'ADM']
+ROLES_TASK_DELETE = ['LEC', 'ADM']
+ROLES_TASK_DOWNLOAD = ['LEC', 'ADM', 'TA']
+ROLES_SUBMISSION_DOWNLOAD = ['LEC', 'ADM', 'TA']
+ROLES_SUBMISSION_VIEW = ['LEC', 'ADM', 'TA']
+ROLES_SUBMISSION_RERUN = ['LEC', 'ADM', 'TA']
 
 ROLES = {
     'course.view': ROLES_COURSE_VIEW,
@@ -217,20 +220,11 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     )
 }
 
-# Luminus OAuth
+# DRF authentication
 
-class LuminusOAuthConfig:
-    client_id         = None
-    client_secret     = None
-    scope             = None
-    class Endpoint:
-        authorization = None
-        access_token  = None
-    class Redirect:
-        authorization = None
-        access_token  = None
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
