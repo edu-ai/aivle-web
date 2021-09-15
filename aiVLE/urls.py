@@ -13,12 +13,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
-from app import views, apis
+from aiVLE.settings import DOMAIN_NAME_PREFIX
+from app import views
 from app.apis import JobViewSet, TaskViewSet, SimilarityViewSet, SubmissionViewSet
 
 router = DefaultRouter()
@@ -62,3 +63,6 @@ urlpatterns = [
     path('dj-rest-auth/', include('dj_rest_auth.urls')),
     path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
 ]
+
+if DOMAIN_NAME_PREFIX is not None:
+    urlpatterns = [path(DOMAIN_NAME_PREFIX, include(urlpatterns))]

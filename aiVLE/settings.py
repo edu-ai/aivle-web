@@ -28,8 +28,8 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['cs4246.comp.nus.edu.sg', 'cs4246-i.comp.nus.edu.sg', '127.0.0.1', 'localhost']
-
+ALLOWED_HOSTS = ['cs4246.comp.nus.edu.sg', 'cs4246-i.comp.nus.edu.sg', '127.0.0.1', 'localhost', '*']
+CORS_ALLOW_ALL_ORIGINS = True
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Application definition
@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'dj_rest_auth.registration',
+    'corsheaders',
 ]
 
 SITE_ID = 1
@@ -71,6 +72,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'updateable.middleware.UpdateableMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'aiVLE.urls'
@@ -228,3 +230,7 @@ REST_FRAMEWORK = {
 
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
+
+# URL prefix to make SoC reverse proxy happy
+DOMAIN_NAME_PREFIX = r'projects/aivle/'
+# DOMAIN_NAME_PREFIX = None
