@@ -33,7 +33,7 @@ class Task(models.Model):
     # parent = models.ForeignKey('self', on_delete=models.CASCADE, related_name='subtasks', null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='tasks')
 
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     @property
