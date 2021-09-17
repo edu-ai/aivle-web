@@ -1,16 +1,17 @@
 from datetime import datetime
 from itertools import groupby
 
-from rest_framework import permissions
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import permissions, filters
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from aiVLE.settings import ROLES_TASK_VIEW_ALL, ROLES_TASK_VIEW
-from app.utils.permission import can
-from app.models import Task, Participation, Course
+from aiVLE.settings import ROLES_TASK_VIEW_ALL
+from app.models import Task, Course
 from app.serializers import TaskSerializer, SimilaritySubmissionSerializer
+from app.utils.permission import can
 
 
 class TaskPermissions(permissions.IsAuthenticated):
@@ -43,18 +44,19 @@ class TaskPermissions(permissions.IsAuthenticated):
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [TaskPermissions]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
+    filterset_fields = ["course"]
+    ordering_fields = ["opened_at", "closed_at", "deadline_at"]
+    search_fields = ["name", "description"]
 
     def get_queryset(self):
         if self.request.user.is_superuser:
             return Task.objects.all()
         # TODO: consider using `can` for the following logic?
-        ptp = Participation.objects.filter(user__username=self.request.user.username)
-        ptp_admin = ptp.filter(role__in=ROLES_TASK_VIEW_ALL)
-        ptp_normal = ptp.filter(role__in=ROLES_TASK_VIEW)
-        normal_course_ids = [i.course.id for i in ptp_normal]
-        admin_course_ids = [i.course.id for i in ptp_admin]
-        return Task.objects.filter(course_id__in=normal_course_ids).filter(opened_at__lt=datetime.now()) | \
-               Task.objects.filter(course_id__in=admin_course_ids)
+        return Task.objects.filter(course__participants__username__contains=self.request.user.username,
+                                   opened_at__lt=datetime.now()) | \
+               Task.objects.filter(course__participants__username__contains=self.request.user.username,
+                                   course__participation__role__in=ROLES_TASK_VIEW_ALL)
 
     @action(detail=True, methods=['get'])
     def submissions_by_user(self, request, pk):
