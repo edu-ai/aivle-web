@@ -8,7 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from aiVLE.settings import ROLES_TASK_VIEW_ALL, ROLES_TASK_VIEW
-from app.funcs import can
+from app.utils.permission import can
 from app.models import Task, Participation, Course
 from app.serializers import TaskSerializer, SimilaritySubmissionSerializer
 

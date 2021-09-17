@@ -10,7 +10,8 @@ from django.db.models import Count
 import app.utils.leaderboard
 from .models import Course, Task, Submission, Participation
 from .forms import TaskForm, SubmissionForm, CourseForm, RegisterForm
-from .funcs import can, submission_is_allowed, course_participations, course_participation
+from .funcs import submission_is_allowed, course_participations, course_participation
+from .utils.permission import can
 from . import utils
 
 import os

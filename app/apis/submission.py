@@ -3,7 +3,7 @@ from rest_framework import permissions
 from rest_framework import viewsets
 
 from aiVLE.settings import ROLES_SUBMISSION_VIEW
-from app.funcs import can
+from app.utils.permission import can
 from app.models import Submission, Task, Participation
 from app.serializers import SubmissionSerializer
 

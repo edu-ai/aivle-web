@@ -1,26 +1,12 @@
 from collections import namedtuple
 
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.utils import timezone
 
 from .forms import CourseForm
-from .models import Participation, Course, Announcement, Submission
+from .models import Participation, Course, Announcement
 
 CourseParticipation = namedtuple('CourseParticipation', ['course', 'participation', 'added', 'joined', 'form'],
                                  defaults=(None,) * 5)
-
-
-def can(course: Course, user: User, action: str, participation: Participation = None, submission: Submission = None):
-    """Check permission based on course, user and action. List of action can be found under ROLES in `settings.py`
-    """
-    if submission and submission.user == user:
-        return True
-    if not participation:
-        participation = Participation.objects.filter(user=user, course=course).first()
-    if not participation:
-        return False
-    return participation.role in settings.ROLES[action]
 
 
 def submission_is_allowed(task, user):
