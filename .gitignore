@@ -94,3 +94,5 @@ uploads
 *.swp
 
 db.sqlite*
+/app/migrations/
+/scheduler/migrations/
