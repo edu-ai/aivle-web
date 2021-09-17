@@ -232,5 +232,5 @@ ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 
 # URL prefix to make SoC reverse proxy happy
-DOMAIN_NAME_PREFIX = r'projects/aivle/'
-# DOMAIN_NAME_PREFIX = None
+# DOMAIN_NAME_PREFIX = r'projects/aivle/'
+DOMAIN_NAME_PREFIX = None

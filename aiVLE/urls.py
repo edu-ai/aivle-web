@@ -48,7 +48,7 @@ urlpatterns = [
     url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/submissions/new/$', views.submission_new,
         name='submission_new'),
 
-    url(r'^tasks/(?P<pk>\d+)/download/$', views.task_download, name='task_download'),
+    url(r'^tasks/(?P<pk>\d+)/download/$', views.task_grader_download, name='task_grader_download'),
     url(r'^tasks/(?P<pk>\d+)/template/$', views.template_download, name='template_download'),
     url(r'^submissions/(?P<pk>\d+)/download/$', views.submission_download, name='submission_download'),
     url(r'^submissions/action/$', views.submissions_action, name='submissions_action'),

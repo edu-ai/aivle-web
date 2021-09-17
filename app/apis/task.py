@@ -10,7 +10,7 @@ from app.models import Task
 from app.serializers import TaskSerializer, SimilaritySubmissionSerializer
 
 
-class TaskViewSet(viewsets.ReadOnlyModelViewSet):
+class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = (IsAdminUser,)

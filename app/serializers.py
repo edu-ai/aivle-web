@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Submission, Task, Similarity, User
+from .models import Submission, Task, Similarity, User, Course
 
 
 class SubmissionSerializer(serializers.HyperlinkedModelSerializer):
@@ -11,16 +11,26 @@ class SubmissionSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'runner', 'metadata', 'docker', 'file_url', 'status', 'point', 'notes', 'task')
 
 
-class TaskSerializer(serializers.HyperlinkedModelSerializer):
-    file_url = serializers.HyperlinkedIdentityField('task_download', read_only=True)
-    template_url = serializers.HyperlinkedIdentityField('template_download', read_only=True)
+class TaskSerializer(serializers.ModelSerializer):
+    grader_file_url = serializers.HyperlinkedIdentityField('task_grader_download', read_only=True)
+    template_file_url = serializers.HyperlinkedIdentityField('template_download', read_only=True)
+    grader = serializers.FileField(use_url=False)
+    template = serializers.FileField(use_url=False)
 
     class Meta:
         model = Task
-        fields = (
-            'id', 'name', 'description', 'file_url', 'file_hash', 'template_url', 'template_file',
-            'daily_submission_limit',
-            'max_upload_size', 'run_time_limit', 'max_image_size', 'opened_at', 'closed_at', 'leaderboard')
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        response = super(TaskSerializer, self).to_representation(instance)
+        response['course'] = CourseSerializer(instance.course).data
+        return response
+
+
+class CourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = "__all__"
 
 
 class UserSerializer(serializers.ModelSerializer):
