@@ -12,17 +12,6 @@ from app.utils.file_hash import submission_path
 
 
 class Submission(models.Model):
-    # STATUS_QUEUED = 'Q'
-    # STATUS_RUNNING = 'R'
-    # STATUS_ERROR = 'E'
-    # STATUS_DONE = 'D'
-    # STATUSES = [
-    #     (STATUS_QUEUED, 'Queued'),
-    #     (STATUS_RUNNING, 'Running'),
-    #     (STATUS_ERROR, 'Error'),
-    #     (STATUS_DONE, 'Done')
-    # ]
-
     description = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to=submission_path, blank=True, null=True)
 
