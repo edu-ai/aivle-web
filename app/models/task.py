@@ -14,9 +14,6 @@ class Task(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
 
-    # file = ExtraFileField(upload_to=task_grader_path, after_file_save=compute_file_hash)
-    # file_hash = models.CharField(max_length=255)
-
     grader = models.FileField(upload_to=task_grader_path)
     template = models.FileField(upload_to=task_template_path, blank=True, null=True)
 

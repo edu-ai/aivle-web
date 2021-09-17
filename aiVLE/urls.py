@@ -24,7 +24,7 @@ from app.apis import JobViewSet, TaskViewSet, SimilarityViewSet, SubmissionViewS
 
 router = DefaultRouter()
 router.register(r'jobs', JobViewSet)
-router.register(r'tasks', TaskViewSet)
+router.register(r'tasks', TaskViewSet, basename="tasks")
 router.register(r'similarities', SimilarityViewSet)
 router.register(r'submissions', SubmissionViewSet)
 
