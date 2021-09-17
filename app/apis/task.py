@@ -1,42 +1,43 @@
 from datetime import datetime
 from itertools import groupby
 
-import rest_framework.request
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.request import Request
 from rest_framework.response import Response
 
+from aiVLE.settings import ROLES_TASK_VIEW_ALL, ROLES_TASK_VIEW
 from app.funcs import can
-from app.models import Task, Participation
+from app.models import Task, Participation, Course
 from app.serializers import TaskSerializer, SimilaritySubmissionSerializer
 
 
-class TaskPermissions(permissions.IsAuthenticatedOrReadOnly):
-    def has_permission(self, request: rest_framework.request.Request, view):
+class TaskPermissions(permissions.IsAuthenticated):
+    def has_permission(self, request: Request, view):
         if not super(TaskPermissions, self).has_permission(request, view):
             return False
         if request.method in ["POST"]:
             if "course" not in request.data:
                 return True  # hack
             course_id = request.data["course"]
-            ptp = Participation.objects.filter(user__username=request.user.username, course_id=course_id,
-                                               role__in=[Participation.ROLE_ADMIN, Participation.ROLE_LECTURER,
-                                                         Participation.ROLE_TEACHING_ASSISTANT])
-            return ptp.exists()
+            course = Course.objects.get(pk=course_id)
+            if not course:
+                return False
+            return can(course, request.user, "task.add")
         return True
 
     def has_object_permission(self, request, view, obj: Task):
-        ptp = Participation.objects.filter(user__username=request.user.username, course=obj.course)
-        if not ptp.exists():
-            return False
         if request.method in permissions.SAFE_METHODS:
-            return True
-        ptp_admin = ptp.filter(role__in=[Participation.ROLE_ADMIN, Participation.ROLE_LECTURER,
-                                         Participation.ROLE_TEACHING_ASSISTANT])
-        if ptp_admin.exists():
-            return True
-        return False
+            return can(obj.course, request.user, "task.view")
+        elif request.method == "POST":
+            return can(obj.course, request.user, "task.add")
+        elif request.method == "PUT":
+            return can(obj.course, request.user, "task.edit")
+        elif request.method == "DELETE":
+            return can(obj.course, request.user, "task.delete")
+        else:
+            return False
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -46,10 +47,10 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_superuser:
             return Task.objects.all()
+        # TODO: consider using `can` for the following logic?
         ptp = Participation.objects.filter(user__username=self.request.user.username)
-        ptp_admin = ptp.filter(role__in=[Participation.ROLE_ADMIN, Participation.ROLE_LECTURER,
-                                         Participation.ROLE_TEACHING_ASSISTANT])
-        ptp_normal = ptp.filter(role__in=[Participation.ROLE_GUEST, Participation.ROLE_STUDENT])
+        ptp_admin = ptp.filter(role__in=ROLES_TASK_VIEW_ALL)
+        ptp_normal = ptp.filter(role__in=ROLES_TASK_VIEW)
         normal_course_ids = [i.course.id for i in ptp_normal]
         admin_course_ids = [i.course.id for i in ptp_admin]
         return Task.objects.filter(course_id__in=normal_course_ids).filter(opened_at__lt=datetime.now()) | \

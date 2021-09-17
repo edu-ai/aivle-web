@@ -1,35 +1,42 @@
-from .models import Participation, Course, Announcement
-from .forms import CourseForm
-from django.conf import settings
-from django.utils import timezone
 from collections import namedtuple
-from cachetools import cached, TTLCache
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.utils import timezone
+
+from .forms import CourseForm
+from .models import Participation, Course, Announcement, Submission
+
+CourseParticipation = namedtuple('CourseParticipation', ['course', 'participation', 'added', 'joined', 'form'],
+                                 defaults=(None,) * 5)
 
 
-CourseParticipation = namedtuple('CourseParticipation', ['course', 'participation', 'added', 'joined', 'form'], defaults=(None,) * 5)
-
-
-def can(course, user, action, participation=None, submission=None):
+def can(course: Course, user: User, action: str, participation: Participation = None, submission: Submission = None):
+    """Check permission based on course, user and action. List of action can be found under ROLES in `settings.py`
+    """
     if submission and submission.user == user:
         return True
     if not participation:
         participation = Participation.objects.filter(user=user, course=course).first()
-    return participation and participation.role in settings.ROLES[action]
+    if not participation:
+        return False
+    return participation.role in settings.ROLES[action]
 
 
 def submission_is_allowed(task, user):
     daily_submission_limit = task.daily_submission_limit
     if task.daily_submission_limit and user.groups.filter(name='Debugger').exists():
         daily_submission_limit += 3
-    user_today_submissions = task.submissions.filter(user=user).filter(created_at__gt=timezone.localtime(timezone.now()).date())
+    user_today_submissions = task.submissions.filter(user=user).filter(
+        created_at__gt=timezone.localtime(timezone.now()).date())
     return task.daily_submission_limit and user_today_submissions.count() < daily_submission_limit
 
 
 def serialize_submission(s):
     return {
-        'id': s.id, 
-        'runner': s.runner, 
-        'metadata': s.metadata, 
+        'id': s.id,
+        'runner': s.runner,
+        'metadata': s.metadata,
         'path': s.file.path if s.file else None,
         'status': s.status,
         'verdict': s.verdict,
@@ -55,7 +62,8 @@ def course_participations(user, with_form=False, hidden_form=True):
     availables = Course.objects.all()
     participated = Course.objects.filter(participants__in=[user]).all()
 
-    cp_participated = [CourseParticipation(c, Participation.objects.get(user=user, course=c), True, True) for c in participated]
+    cp_participated = [CourseParticipation(c, Participation.objects.get(user=user, course=c), True, True) for c in
+                       participated]
 
     rests = [course for course in availables if course not in participated]
     cp_rests = []
@@ -82,7 +90,7 @@ def course_participations(user, with_form=False, hidden_form=True):
 
 def course_participation(user, course):
     cps = course_participations(user)
-    cp = next(filter(lambda cp: cp.course == course,  cps))
+    cp = next(filter(lambda cp: cp.course == course, cps))
     return cp
 
 

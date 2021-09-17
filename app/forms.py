@@ -75,11 +75,9 @@ class TaskForm(forms.ModelForm):
 
 
 class SubmissionForm(forms.ModelForm):
-    runner = forms.ChoiceField(choices=Submission.RUNNERS)
-
     class Meta:
         model = Submission
-        fields = ['runner', 'file', 'docker', 'metadata', 'description']
+        fields = ['file', 'metadata', 'description']
         labels = {
             "file": "File (.zip)",
         }

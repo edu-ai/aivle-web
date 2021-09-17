@@ -187,7 +187,9 @@ ROLES_COURSE_DELETE = ['LEC', 'ADM']
 ROLES_COURSE_VIEW = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
 ROLES_COURSE_JOIN = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
 ROLES_TASK_VIEW = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
+ROLES_TASK_VIEW_ALL = ['TA', 'LEC', 'ADM']  # view unpublished tasks
 ROLES_TASK_SUBMIT = ['STU', 'TA', 'LEC', 'ADM']
+ROLES_TASK_ADD = ['LEC', 'ADM']
 ROLES_TASK_EDIT = ['TA', 'LEC', 'ADM']
 ROLES_TASK_DELETE = ['LEC', 'ADM']
 ROLES_TASK_DOWNLOAD = ['LEC', 'ADM', 'TA']
@@ -201,6 +203,7 @@ ROLES = {
     'course.delete': ROLES_COURSE_DELETE,
     'course.join': ROLES_COURSE_JOIN,
     'task.view': ROLES_TASK_VIEW,
+    'task.add': ROLES_TASK_ADD,
     'task.edit': ROLES_TASK_EDIT,
     'task.delete': ROLES_TASK_DELETE,
     'task.submit': ROLES_TASK_SUBMIT,

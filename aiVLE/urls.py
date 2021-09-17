@@ -26,7 +26,7 @@ router = DefaultRouter()
 router.register(r'jobs', JobViewSet)
 router.register(r'tasks', TaskViewSet, basename="tasks")
 router.register(r'similarities', SimilarityViewSet)
-router.register(r'submissions', SubmissionViewSet)
+router.register(r'submissions', SubmissionViewSet, basename="submissions")
 
 urlpatterns = [
     url(r'^$', views.courses, name='home'),
