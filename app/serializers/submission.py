@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.models import User
+from rest_framework.fields import DecimalField, CharField
 from rest_framework.serializers import HyperlinkedIdentityField, FileField, PrimaryKeyRelatedField, CurrentUserDefault, \
     ModelSerializer
 
@@ -38,3 +39,4 @@ class SubmissionSerializer(ModelSerializer):
     class Meta:
         model = Submission
         fields = "__all__"
+        read_only_fields = ('point', 'notes')

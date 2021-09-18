@@ -5,5 +5,5 @@ class AppConfig(AppConfig):
     name = 'app'
 
     # noinspection PyUnresolvedReferences
-    def ready(self):
-        import app.signals
+    # def ready(self):
+    #     import app.signals

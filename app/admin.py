@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from app.models import Course, Task, Submission, Participation, Similarity, Announcement, Job
+from app.models import Course, Task, Submission, Participation, Similarity, Announcement
 
 admin.site.register(Course)
 admin.site.register(Task)
@@ -10,7 +10,6 @@ admin.site.register(Submission)
 admin.site.register(Participation)
 admin.site.register(Similarity)
 admin.site.register(Announcement)
-admin.site.register(Job)
 
 admin.site.unregister(User)
 

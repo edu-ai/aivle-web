@@ -20,3 +20,9 @@ class Job(models.Model):
     worker_log = models.TextField(blank=True, null=True)
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name="jobs")
     status = models.CharField(max_length=2, choices=STATUSES, default=STATUS_QUEUED)
+
+    def __str__(self):
+        if self.worker:
+            return f"Job - {self.worker.name} - {self.status} - {self.submission_id}"
+        else:
+            return f"Job - NO_WORKER - {self.status} - {self.submission_id}"

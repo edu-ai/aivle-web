@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from app.models import Submission
-from app.models.job import Job
+from scheduler.models import Job
 
 
 @receiver(post_save, sender=Submission)
