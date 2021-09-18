@@ -41,8 +41,14 @@ def submission_path(instance, filename):
     )
 
 
-def task_path(instance, filename):
-    return 'courses/{}/tasks/{}/{}'.format(
+def task_grader_path(instance, filename):
+    return 'courses/{}/tasks/{}/grader/{}'.format(
+        instance.course.id, make_safe_filename(instance.name), filename
+    )
+
+
+def task_template_path(instance, filename):
+    return 'courses/{}/tasks/{}/template/{}'.format(
         instance.course.id, make_safe_filename(instance.name), filename
     )
 

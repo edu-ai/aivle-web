@@ -10,7 +10,8 @@ from django.db.models import Count
 import app.utils.leaderboard
 from .models import Course, Task, Submission, Participation
 from .forms import TaskForm, SubmissionForm, CourseForm, RegisterForm
-from .funcs import can, submission_is_allowed, course_participations, course_participation
+from .funcs import submission_is_allowed, course_participations, course_participation
+from .utils.permission import can
 from . import utils
 
 import os
@@ -128,7 +129,7 @@ def task_delete(request, course_pk, task_pk):
     return redirect(redirect_url)
 
 @login_required
-def task_download(request, pk):
+def task_grader_download(request, pk):
     task = get_object_or_404(Task, pk=pk)
     redirect_url = reverse('course', args=(task.course.pk,))
 
@@ -136,8 +137,8 @@ def task_download(request, pk):
         messages.error(request, 'You are not allowed to download this task.')
         return redirect(redirect_url)
 
-    filename = os.path.basename(task.file.name)
-    response = HttpResponse(task.file, content_type='application/zip')
+    filename = os.path.basename(task.grader.name)
+    response = HttpResponse(task.grader, content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
 
     return response

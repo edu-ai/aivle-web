@@ -1,5 +1,5 @@
 from django import template
-from ..funcs import can
+from ..utils.permission import can
 
 register = template.Library()
 
