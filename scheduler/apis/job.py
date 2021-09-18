@@ -30,7 +30,9 @@ class JobViewSet(ReadOnlyModelViewSet):
         job.worker_name = worker_name
         job.save()
         return Response({
-            "status": "success"
+            "status": "success",
+            "task": job.submission.task.pk,
+            "submission": job.submission.pk,
         })
 
     @action(detail=True)

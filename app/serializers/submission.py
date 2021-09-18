@@ -1,8 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.models import User
-from rest_framework.fields import DecimalField, CharField
-from rest_framework.serializers import HyperlinkedIdentityField, FileField, PrimaryKeyRelatedField, CurrentUserDefault, \
+from rest_framework.serializers import FileField, PrimaryKeyRelatedField, CurrentUserDefault, \
     ModelSerializer
 
 from aiVLE.settings import ROLES_TASK_VIEW_ALL
@@ -31,7 +30,6 @@ class TaskField(PrimaryKeyRelatedField):
 
 
 class SubmissionSerializer(ModelSerializer):
-    download_url = HyperlinkedIdentityField('submission_download', read_only=True)
     file = FileField(use_url=False)
     user = UserField(default=CurrentUserDefault())
     task = TaskField()

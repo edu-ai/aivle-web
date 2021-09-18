@@ -1,8 +1,11 @@
+import os
 from datetime import datetime
 from itertools import groupby
 
+from django.http import FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, filters
+from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -72,3 +75,27 @@ class TaskViewSet(viewsets.ModelViewSet):
                 serializer = SimilaritySubmissionSerializer(submissions, many=True, context={'request': request})
                 result[user.pk] = serializer.data
             return Response(result)
+
+    @action(detail=True, methods=["get"])
+    def download_grader(self, request, pk):
+        task = self.get_object()
+        if not can(task.course, request.user, "task.download"):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        file_handle = task.grader.open()
+        response = FileResponse(file_handle, content_type="application/zip")
+        response['Content-Length'] = task.grader.size
+        response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(task.grader.name)
+        return response
+
+    @action(detail=True, methods=["get"])
+    def download_template(self, request, pk):
+        task = self.get_object()
+        if not can(task.course, request.user, "task.download"):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not task.template:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        file_handle = task.template.open()
+        response = FileResponse(file_handle, content_type="application/octet-stream")
+        response['Content-Length'] = task.template.size
+        response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(task.template.name)
+        return response

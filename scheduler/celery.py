@@ -13,9 +13,6 @@ app = Celery('aiVLE')
 app.config_from_object('django.conf:settings', namespace="CELERY")
 
 
-# app.autodiscover_tasks()
-
-
 @app.task(bind=True, name="aiVLE.submit_eval_task")
 def evaluate(self, job_id):
     pass

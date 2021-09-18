@@ -1,5 +1,4 @@
 from rest_framework.fields import FileField, IntegerField
-from rest_framework.relations import HyperlinkedIdentityField
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
 
 from app.models import Task, Course
@@ -16,8 +15,6 @@ class CourseField(PrimaryKeyRelatedField):
 
 
 class TaskSerializer(ModelSerializer):
-    grader_file_url = HyperlinkedIdentityField('task_grader_download', read_only=True)
-    template_file_url = HyperlinkedIdentityField('template_download', read_only=True)
     grader = FileField(use_url=False)
     template = FileField(use_url=False, required=False)
     daily_submission_limit = IntegerField(default=3)

@@ -1,11 +1,16 @@
+import os
+
 from django.contrib.auth.models import User
-from rest_framework import permissions
+from django.http import FileResponse
+from rest_framework import permissions, status
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from aiVLE.settings import ROLES_SUBMISSION_VIEW
-from app.utils.permission import can
 from app.models import Submission, Task, Participation
 from app.serializers import SubmissionSerializer
+from app.utils.permission import can
 
 
 class SubmissionPermissions(permissions.IsAuthenticated):
@@ -44,3 +49,14 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         admin_courses = [i.course for i in ptp_admin]
         return Submission.objects.filter(user__username=self.request.user.username) | \
                Submission.objects.filter(task__course__in=admin_courses)
+
+    @action(methods=["get"], detail=True)
+    def download(self, request, pk=None):
+        submission = self.get_object()
+        if not can(submission.task.course, request.user, "submission.download"):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        file_handle = submission.file.open()
+        response = FileResponse(file_handle, content_type="application/octet-stream")
+        response['Content-Length'] = submission.file.size
+        response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(submission.file.name)
+        return response
