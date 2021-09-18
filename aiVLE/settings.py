@@ -187,13 +187,15 @@ ROLES_COURSE_ADD = ['LEC', 'ADM']
 ROLES_COURSE_DELETE = ['LEC', 'ADM']
 ROLES_COURSE_VIEW = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
 ROLES_COURSE_JOIN = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
+
 ROLES_TASK_VIEW = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
 ROLES_TASK_VIEW_ALL = ['TA', 'LEC', 'ADM']  # view unpublished tasks
-ROLES_TASK_SUBMIT = ['STU', 'TA', 'LEC', 'ADM']
 ROLES_TASK_ADD = ['LEC', 'ADM']
 ROLES_TASK_EDIT = ['TA', 'LEC', 'ADM']
 ROLES_TASK_DELETE = ['LEC', 'ADM']
 ROLES_TASK_DOWNLOAD = ['LEC', 'ADM', 'TA']
+
+ROLES_TASK_SUBMIT = ['STU', 'TA', 'LEC', 'ADM']
 ROLES_SUBMISSION_DOWNLOAD = ['LEC', 'ADM', 'TA']
 ROLES_SUBMISSION_VIEW = ['LEC', 'ADM', 'TA']
 ROLES_SUBMISSION_RERUN = ['LEC', 'ADM', 'TA']
@@ -238,3 +240,12 @@ ACCOUNT_AUTHENTICATION_METHOD = 'username'
 # URL prefix to make SoC reverse proxy happy
 # DOMAIN_NAME_PREFIX = r'projects/aivle/'
 DOMAIN_NAME_PREFIX = None
+
+
+# Celery configuration
+CELERY_BROKER_URL = "amqp://localhost"
+CELERY_RESULT_BACKEND = "rpc"
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Singapore'

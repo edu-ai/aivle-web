@@ -31,7 +31,6 @@ Create your secret key and store it in ``.env`` as ``SECRET_KEY=<Your Key>``.
 Migrate and create the superuser
 ```
 python manage.py makemigrations
-python manage.py sqlmigrate app 0001
 python manage.py migrate
 python manage.py createsuperuser
 ```

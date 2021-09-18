@@ -20,7 +20,8 @@ from rest_framework.routers import DefaultRouter
 
 from aiVLE.settings import DOMAIN_NAME_PREFIX
 from app import views
-from app.apis import JobViewSet, TaskViewSet, SimilarityViewSet, SubmissionViewSet
+from app.apis import TaskViewSet, SimilarityViewSet, SubmissionViewSet
+from scheduler.apis import JobViewSet
 
 router = DefaultRouter()
 router.register(r'jobs', JobViewSet)
