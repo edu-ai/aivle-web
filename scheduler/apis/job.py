@@ -1,15 +1,39 @@
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from app.utils.permission import can
 from scheduler.models import Job
-from scheduler.serializers import JobSerializer
+from scheduler.serializers import JobSerializer, JobListSerializer
+
+
+class JobPermissions(IsAuthenticated):
+    def has_permission(self, request, view):
+        if not super(JobPermissions, self).has_permission(request, view):
+            return False
+        if request.method not in SAFE_METHODS:
+            return False  # read only permission
+        return True
+
+    def has_object_permission(self, request, view, obj: Job):
+        if request.method not in SAFE_METHODS:
+            return False  # read only permission
+        return can(obj.submission.task.course, request.user, "job.view")
 
 
 class JobViewSet(ReadOnlyModelViewSet):
     serializer_class = JobSerializer
     queryset = Job.objects.all()
+    permission_classes = [JobPermissions]
+
+    def get_serializer_class(self, *args, **kwargs):
+        """Instantiate the list of serializers per action from class attribute (must be defined)."""
+        kwargs['partial'] = True
+        if self.action == "list":
+            return JobListSerializer
+        return super(JobViewSet, self).get_serializer_class()
 
     @action(detail=True)
     def start_job(self, request, pk=None):

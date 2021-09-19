@@ -6,5 +6,10 @@ from scheduler.models import Job
 class JobSerializer(ModelSerializer):
     class Meta:
         model = Job
-        fields = "__all__"
-        
+        fields = ("id", "worker_name", "status", "worker_log",)
+
+
+class JobListSerializer(ModelSerializer):
+    class Meta:
+        model = Job
+        fields = ("id", "worker_name", "status",)

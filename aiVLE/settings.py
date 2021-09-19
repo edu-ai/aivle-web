@@ -200,6 +200,8 @@ ROLES_SUBMISSION_DOWNLOAD = ['LEC', 'ADM', 'TA']
 ROLES_SUBMISSION_VIEW = ['LEC', 'ADM', 'TA']
 ROLES_SUBMISSION_RERUN = ['LEC', 'ADM', 'TA']
 
+ROLES_JOB_VIEW = ['LEC', 'ADM', 'TA']
+
 ROLES = {
     'course.view': ROLES_COURSE_VIEW,
     'course.add': ROLES_COURSE_ADD,
@@ -214,6 +216,7 @@ ROLES = {
     'submission.download': ROLES_SUBMISSION_DOWNLOAD,
     'submission.view': ROLES_SUBMISSION_VIEW,
     'submission.rerun': ROLES_SUBMISSION_RERUN,
+    'job.view': ROLES_JOB_VIEW,
 }
 
 # Upload
