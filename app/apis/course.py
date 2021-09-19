@@ -2,7 +2,7 @@ from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.viewsets import ModelViewSet
 
 from app.models import Course
-from app.serializers import CourseSerializer
+from app.serializers import CourseSerializer, CourseListSerializer
 from app.utils.permission import can
 
 
@@ -30,6 +30,16 @@ class CoursePermissions(IsAuthenticated):
 class CourseViewSet(ModelViewSet):
     serializer_class = CourseSerializer
     permission_classes = [CoursePermissions]
+
+    # filter_backends = [DjangoFilterBackend]
+    # filterset_fields = ["participants"]
+
+    def get_serializer_class(self, *args, **kwargs):
+        """Instantiate the list of serializers per action from class attribute (must be defined)."""
+        kwargs['partial'] = True
+        if self.action == "list":
+            return CourseListSerializer
+        return super(CourseViewSet, self).get_serializer_class()
 
     def get_queryset(self):
         if self.request.user.has_perm("app.view_invisible_course"):

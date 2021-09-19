@@ -63,7 +63,7 @@ class TaskViewSet(viewsets.ModelViewSet):
                Task.objects.filter(course__participants__username__contains=self.request.user.username,
                                    course__participation__role__in=ROLES_TASK_VIEW_ALL)
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def submissions_by_user(self, request, pk):
         if request.method == 'GET':
             task = Task.objects.get(pk=pk)
