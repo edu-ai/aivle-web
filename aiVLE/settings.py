@@ -183,7 +183,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Permissions
 
-ROLES_COURSE_ADD = ['LEC', 'ADM']
+ROLES_COURSE_ADD = ['LEC', 'ADM']  # TODO: remove
+ROLES_COURSE_EDIT = ['LEC', 'ADM']
 ROLES_COURSE_DELETE = ['LEC', 'ADM']
 ROLES_COURSE_VIEW = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
 ROLES_COURSE_JOIN = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
@@ -204,7 +205,8 @@ ROLES_JOB_VIEW = ['LEC', 'ADM', 'TA']
 
 ROLES = {
     'course.view': ROLES_COURSE_VIEW,
-    'course.add': ROLES_COURSE_ADD,
+    'course.edit': ROLES_COURSE_EDIT,
+    'course.add': ROLES_COURSE_ADD,  # TODO: remove
     'course.delete': ROLES_COURSE_DELETE,
     'course.join': ROLES_COURSE_JOIN,
     'task.view': ROLES_TASK_VIEW,
@@ -243,7 +245,6 @@ ACCOUNT_AUTHENTICATION_METHOD = 'username'
 # URL prefix to make SoC reverse proxy happy
 # DOMAIN_NAME_PREFIX = r'projects/aivle/'
 DOMAIN_NAME_PREFIX = None
-
 
 # Celery configuration
 CELERY_BROKER_URL = os.getenv("BROKER_URI")

@@ -5,6 +5,9 @@ from django.db import models
 class Course(models.Model):
     class Meta:
         unique_together = (('code', 'academic_year', 'semester'),)
+        permissions = [
+            ("view_invisible_course", "Can view invisible courses")
+        ]
 
     code = models.CharField(max_length=6)
     academic_year = models.CharField(max_length=30)
