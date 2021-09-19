@@ -26,7 +26,11 @@ Install the requirements
 pip install -r requirements.txt
 ```
 
-Create your secret key and store it in ``.env`` as ``SECRET_KEY=<Your Key>``.
+Create your secret key and store it in ``.env`` as 
+```dotenv
+SECRET_KEY=<YourKey>
+BROKER_URI=<YourRMQBrokerUri>
+```
 
 Migrate and create the superuser
 ```

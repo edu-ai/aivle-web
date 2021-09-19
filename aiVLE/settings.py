@@ -243,7 +243,7 @@ DOMAIN_NAME_PREFIX = None
 
 
 # Celery configuration
-CELERY_BROKER_URL = "amqp://localhost"
+CELERY_BROKER_URL = os.getenv("BROKER_URI")
 CELERY_RESULT_BACKEND = "rpc"
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
