@@ -1,3 +1,7 @@
+import logging
+import pickle
+from ast import literal_eval
+
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
@@ -7,6 +11,8 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from app.utils.permission import can
 from scheduler.models import Job
 from scheduler.serializers import JobSerializer, JobListSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class JobPermissions(IsAuthenticated):
@@ -81,6 +87,15 @@ class JobViewSet(ReadOnlyModelViewSet):
             })
         job.status = Job.STATUS_DONE
         job.worker_log = result
+        try:  # TODO: no hack, support for >1 test cases
+            obj = pickle.loads(literal_eval(result))
+            score = obj["results"][0]["result"]["value"]
+            submission = job.submission
+            submission.point = score
+            submission.save()
+        except Exception as e:
+            logger.warning(e)
+            pass
         job.save()
         return Response({
             "status": "success"
