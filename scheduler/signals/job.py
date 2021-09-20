@@ -8,6 +8,8 @@ from scheduler.models import Job
 
 @receiver(post_save, sender=Submission)
 def submit_job(sender, instance: Submission, created, **kwargs):
+    if not created:
+        return  # prevent dead lock
     job = Job.objects.create(submission=instance)
     job.save()
     result = evaluate.delay(job_id=job.pk)
