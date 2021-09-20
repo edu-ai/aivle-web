@@ -26,7 +26,7 @@ class Job(models.Model):
     task_id = models.CharField(max_length=64, null=True)
 
     def __str__(self):
-        if self.worker:
+        if self.worker_name:
             return f"Job - {self.worker_name} - {self.status} - {self.submission_id}"
         else:
             return f"Job - NO_WORKER - {self.status} - {self.submission_id}"
