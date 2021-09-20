@@ -24,7 +24,9 @@ class SubmissionPermissions(permissions.IsAuthenticated):
             task = Task.objects.get(pk=task_id)
             if not task:
                 return False
-            user_id = request.data["user"]
+            if "user" not in request.data:  # user is inferred from credentials by default
+                request.data["user"] = request.user.pk
+            user_id = request.data["user"]  # this is to support DRF frontend behavior
             user = User.objects.get(pk=user_id)
             if not user or request.user != user:  # only allowed to submit on behalf of yourself
                 return False
