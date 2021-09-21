@@ -92,6 +92,7 @@ class JobViewSet(ReadOnlyModelViewSet):
             score = obj["results"][0]["result"]["value"]
             submission = job.submission
             submission.point = score
+            submission.notes = str(obj)
             submission.save()
         except Exception as e:
             logger.warning(e)
