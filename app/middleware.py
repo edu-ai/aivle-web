@@ -1,10 +1,11 @@
 import base64
 
 from django.utils.deprecation import MiddlewareMixin
-from django.http import HttpResponse 
+from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 
 AUTH_TEMPLATE = """ <html> <title>Authentication Required</title> <body> Access Denied. </body> </html> """
+
 
 class SupportBasicAuthMiddleware(MiddlewareMixin):
     def _unauthed(self):

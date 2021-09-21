@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
@@ -30,35 +31,15 @@ router.register(r'submissions', SubmissionViewSet, basename="submissions")
 router.register(r'courses', CourseViewSet, basename="courses")
 
 urlpatterns = [
-    url(r'^$', views.courses, name='home'),
-
-    url(r'^courses/$', views.courses, name='courses'),
-    url(r'^courses/new/$', views.course_add, name='course_add'),
-    url(r'^courses/(?P<course_pk>\d+)/$', views.course, name='course'),
-    url(r'^courses/(?P<course_pk>\d+)/delete/$', views.course_delete, name='course_delete'),
-    url(r'^courses/(?P<course_pk>\d+)/join/$', views.course_join, name='course_join'),
-
-    url(r'^courses/(?P<course_pk>\d+)/tasks/new/$', views.task_edit, name='task_new'),
-    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/edit/$', views.task_edit, name='task_edit'),
-    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/delete/$', views.task_delete, name='task_delete'),
-    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/leaderboard/$', views.leaderboard, name='leaderboard'),
-    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/stats/$', views.stats, name='stats'),
-    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/similarities/$', views.similarities, name='similarities'),
-
-    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/submissions/$', views.submissions, name='submissions'),
-    url(r'^courses/(?P<course_pk>\d+)/tasks/(?P<task_pk>\d+)/submissions/new/$', views.submission_new,
-        name='submission_new'),
+    path('', lambda req: redirect('api/v1/')),
 
     url(r'^tasks/(?P<pk>\d+)/download/$', views.task_grader_download, name='task_grader_download'),
     url(r'^tasks/(?P<pk>\d+)/template/$', views.template_download, name='template_download'),
     url(r'^submissions/(?P<pk>\d+)/download/$', views.submission_download, name='submission_download'),
-    url(r'^submissions/action/$', views.submissions_action, name='submissions_action'),
 
     path('api/v1/', include(router.urls)),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
-
-    url(r'^signup/$', views.signup, name='signup'),
 
     path('scheduler/', include('scheduler.urls')),  # TODO: remove test URLs
     path('dj-rest-auth/', include('dj_rest_auth.urls')),
