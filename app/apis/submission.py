@@ -2,7 +2,8 @@ import os
 
 from django.contrib.auth.models import User
 from django.http import FileResponse
-from rest_framework import permissions, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import permissions, status, filters
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -42,6 +43,9 @@ class SubmissionPermissions(permissions.IsAuthenticated):
 class SubmissionViewSet(viewsets.ModelViewSet):
     serializer_class = SubmissionSerializer
     permission_classes = [SubmissionPermissions]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ["user", "task"]
+    ordering_fields = ["created_at"]
 
     def get_queryset(self):
         if self.request.user.is_superuser:

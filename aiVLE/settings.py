@@ -241,6 +241,9 @@ REST_FRAMEWORK = {
 
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
+REST_AUTH_SERIALIZERS = {
+    'TOKEN_SERIALIZER': 'app.serializers.token.CustomTokenSerializer',
+}
 
 # URL prefix to make SoC reverse proxy happy
 # DOMAIN_NAME_PREFIX = r'projects/aivle/'
