@@ -19,7 +19,6 @@ from django.shortcuts import redirect
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from aiVLE.settings import DOMAIN_NAME_PREFIX
 from app import views
 from app.apis import TaskViewSet, SubmissionViewSet, CourseViewSet
 from scheduler.apis import JobViewSet
@@ -45,6 +44,3 @@ urlpatterns = [
     path('dj-rest-auth/', include('dj_rest_auth.urls')),
     path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
 ]
-
-if DOMAIN_NAME_PREFIX is not None:
-    urlpatterns = [path(DOMAIN_NAME_PREFIX, include(urlpatterns))]

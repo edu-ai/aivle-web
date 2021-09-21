@@ -104,7 +104,8 @@ CHANNEL_LAYERS = {
         },
     },
 }
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"  # Reference:
+# disable this for now, async safety may cause trouble for channels
+# os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -138,44 +139,16 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'Asia/Singapore'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-
-# Auth
-
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
-
-# Messages
-
-from django.contrib.messages import constants as messages
-
-MESSAGE_TAGS = {
-    messages.DEBUG: 'alert-info',
-    messages.INFO: 'alert-info',
-    messages.SUCCESS: 'alert-success',
-    messages.WARNING: 'alert-warning',
-    messages.ERROR: 'alert-danger',
-}
-
-# Crispy form
-
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+STATICFILES_DIRS = []
 
 # Permissions
 
@@ -241,9 +214,6 @@ REST_AUTH_SERIALIZERS = {
     'TOKEN_SERIALIZER': 'app.serializers.token.CustomTokenSerializer',
 }
 
-# URL prefix to make SoC reverse proxy happy
-# DOMAIN_NAME_PREFIX = r'projects/aivle/'
-DOMAIN_NAME_PREFIX = None
 
 # Celery configuration
 CELERY_BROKER_URL = os.getenv("BROKER_URI")
