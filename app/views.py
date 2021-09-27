@@ -1,10 +1,12 @@
 import os
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, reverse
 
+from aiVLE.settings import FRONTEND_URL
 from .models import Task, Submission
 from .utils.permission import can
 
@@ -58,8 +60,8 @@ def submission_download(request, pk):
 
 
 def handle_verify_email(request, key):
-    print(key)
-    return redirect("/api/v1")
+    params = urlencode({"key": key})
+    return redirect(f"{FRONTEND_URL}/account/verify_email/?{params}")
 
 
 def handle_reset_password(request, uid, token):

@@ -235,3 +235,6 @@ CELERY_TIMEZONE = 'Asia/Singapore'
 
 # HTTPS for reverse proxy
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Frontend URL
+FRONTEND_URL = os.getenv('FRONTEND_URL')

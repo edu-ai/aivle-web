@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from dj_rest_auth.registration.views import VerifyEmailView
 from django.conf.urls import url
 from django.contrib import admin
 from django.shortcuts import redirect
@@ -48,6 +49,7 @@ urlpatterns = [
         r'^dj-rest-auth/accounts/reset/(?P<uid>[-:\w]+)/(?P<token>[-:\w]+)/$', views.handle_reset_password,
         name='password_reset_confirm',
     ),
+    url('dj-rest-auth/account/confirm-email/', VerifyEmailView.as_view(), name='account_email_verification_sent'),
     path('dj-rest-auth/', include('dj_rest_auth.urls')),
     path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
 ]
