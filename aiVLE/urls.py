@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.shortcuts import redirect
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 
 from app import views
@@ -38,9 +38,16 @@ urlpatterns = [
 
     path('api/v1/', include(router.urls)),
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
 
     path('scheduler/', include('scheduler.urls')),  # TODO: remove test URLs
+    re_path(
+        r'^dj-rest-auth/registration/account-confirm-email/(?P<key>[-:\w]+)/$', views.handle_verify_email,
+        name='account_confirm_email',
+    ),
+    re_path(
+        r'^dj-rest-auth/accounts/reset/(?P<uid>[-:\w]+)/(?P<token>[-:\w]+)/$', views.handle_reset_password,
+        name='password_reset_confirm',
+    ),
     path('dj-rest-auth/', include('dj_rest_auth.urls')),
     path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
 ]

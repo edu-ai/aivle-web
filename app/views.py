@@ -55,3 +55,14 @@ def submission_download(request, pk):
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
 
     return response
+
+
+def handle_verify_email(request, key):
+    print(key)
+    return redirect("/api/v1")
+
+
+def handle_reset_password(request, uid, token):
+    print(uid)
+    print(token)
+    return redirect("/api/v1")

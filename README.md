@@ -17,8 +17,12 @@ pip install -r requirements.txt
 
 Create your secret key and store it in ``.env`` as 
 ```dotenv
-SECRET_KEY=<YourKey>
-BROKER_URI=<YourRMQBrokerUri>
+SECRET_KEY=<redacted>
+BROKER_URI=<redacted>
+FRONTEND_URL=<redacted>
+EMAIL_HOST_USER=<redacted>
+EMAIL_HOST_PASSWORD=<redacted>
+DEFAULT_FROM_EMAIL=<redacted>
 ```
 
 Migrate and create the superuser
