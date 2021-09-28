@@ -65,6 +65,5 @@ def handle_verify_email(request, key):
 
 
 def handle_reset_password(request, uid, token):
-    print(uid)
-    print(token)
-    return redirect("/api/v1")
+    params = urlencode({"uid": uid, "token": token})
+    return redirect(f"{FRONTEND_URL}/account/reset_password_confirm/?{params}")
