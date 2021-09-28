@@ -4,3 +4,4 @@ from app.serializers.submission import *
 from app.serializers.task import *
 from app.serializers.user import *
 from app.serializers.token import *
+from app.serializers.invitation import *
