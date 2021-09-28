@@ -1,21 +1,10 @@
 # aiVLE: AI Virtual Learning Environment
 
-A platform for lecturers to provide students with an environment to run and grade their artificial intelligence agents.
-
-## Screenshots
-
-| ![Courses](/assets/courses.png?raw=true "Courses") | ![Tasks](/assets/tasks.png?raw=true "Tasks") | 
-|:-------------------------:|:-------------------------:|
-| ![Task Edit](/assets/task_edit.png?raw=true "Task Edit") | ![Submissions](/assets/submissions.png?raw=true "Submissions") 
-| ![Submission](/assets/submission.png?raw=true "Submission") | ![Leaderboard](/assets/leaderboard.png?raw=true "Leaderboard") |
-
-## Status
-
-This project is still under development, please report any issues if you encounter them.
+> This repository is for aiVLE backend (a REST API server). For frontend, please refer to [aiVLE FE](https://github.com/le0tan/aivle-fe).
 
 ## Requirements
 
- * Python > 3.6
+ * Python >= 3.7
  * Django
  * Additional requirements listed in `requirements.txt`
 
@@ -28,8 +17,12 @@ pip install -r requirements.txt
 
 Create your secret key and store it in ``.env`` as 
 ```dotenv
-SECRET_KEY=<YourKey>
-BROKER_URI=<YourRMQBrokerUri>
+SECRET_KEY=<redacted>
+BROKER_URI=<redacted>
+FRONTEND_URL=<redacted>
+EMAIL_HOST_USER=<redacted>
+EMAIL_HOST_PASSWORD=<redacted>
+DEFAULT_FROM_EMAIL=<redacted>
 ```
 
 Migrate and create the superuser
@@ -42,14 +35,4 @@ python manage.py createsuperuser
 Run server
 ```
 python manage.py runserver
-```
-
-## API
-
-Set of API for the runner
-```
-/api/v1/jobs/			[GET]
-/api/v1/jobs/1/			[GET]
-/api/v1/jobs/1/run/		[POST]
-/api/v1/jobs/1/end/		[POST]
 ```
