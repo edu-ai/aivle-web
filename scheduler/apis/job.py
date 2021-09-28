@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from app.utils.permission import can
+from app.utils.permission import has_perm
 from scheduler.models import Job
 from scheduler.serializers import JobSerializer, JobListSerializer
 
@@ -26,7 +26,7 @@ class JobPermissions(IsAuthenticated):
     def has_object_permission(self, request, view, obj: Job):
         if request.method not in SAFE_METHODS:
             return False  # read only permission
-        return can(obj.submission.task.course, request.user, "job.view")
+        return has_perm(obj.submission.task.course, request.user, "job.view")
 
 
 class JobViewSet(ReadOnlyModelViewSet):

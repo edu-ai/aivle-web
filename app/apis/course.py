@@ -7,7 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from app.models import Course, Invitation, Participation
 from app.models.invitation import is_valid_invitation
 from app.serializers import CourseSerializer, CourseListSerializer
-from app.utils.permission import can
+from app.utils.permission import has_perm
 
 
 class CoursePermissions(IsAuthenticated):
@@ -22,13 +22,13 @@ class CoursePermissions(IsAuthenticated):
         if request.user.is_superuser:
             return True
         elif request.method in SAFE_METHODS:
-            return can(obj, request.user, "course.view")
+            return has_perm(obj, request.user, "course.view")
         elif request.method == "POST":
             return request.user.has_perm("app.add_course")
         elif request.method == "PUT":
-            return can(obj, request.user, "course.edit")
+            return has_perm(obj, request.user, "course.edit")
         elif request.method == "DELETE":
-            return can(obj, request.user, "course.delete")
+            return has_perm(obj, request.user, "course.delete")
 
 
 class CourseViewSet(ModelViewSet):

@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from app.models import Invitation, Course
 from app.serializers import InvitationSerializer
-from app.utils.permission import can
+from app.utils.permission import has_perm
 from aiVLE.settings import ROLES_INVITATION_VIEW
 
 
@@ -16,20 +16,20 @@ class InvitationPermissions(IsAuthenticated):
             if "course" not in request.data:
                 return True  # hack
             course = Course.objects.get(pk=int(data["course"][0]))
-            return can(course, request.user, "invitation.add")
+            return has_perm(course, request.user, "invitation.add")
         return True
 
     def has_object_permission(self, request, view, obj: Invitation):
         if request.user.is_superuser:
             return True
         elif request.method in SAFE_METHODS:
-            return can(obj.course, request.user, "invitation.view")
+            return has_perm(obj.course, request.user, "invitation.view")
         elif request.method == "POST":
-            return can(obj.course, request.user, "invitation.add")
+            return has_perm(obj.course, request.user, "invitation.add")
         elif request.method == "PUT":
-            return can(obj.course, request.user, "invitation.edit")
+            return has_perm(obj.course, request.user, "invitation.edit")
         elif request.method == "DELETE":
-            return can(obj.course, request.user, "invitation.delete")
+            return has_perm(obj.course, request.user, "invitation.delete")
 
 
 class InvitationViewSet(ModelViewSet):

@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from aiVLE.settings import ROLES_SUBMISSION_VIEW
 from app.models import Submission, Task, Participation
 from app.serializers import SubmissionSerializer
-from app.utils.permission import can
+from app.utils.permission import has_perm
 
 
 class SubmissionPermissions(permissions.IsAuthenticated):
@@ -31,7 +31,7 @@ class SubmissionPermissions(permissions.IsAuthenticated):
             user = User.objects.get(pk=user_id)
             if not user or request.user != user:  # only allowed to submit on behalf of yourself
                 return False
-            return can(task.course, request.user, "task.submit")
+            return has_perm(task.course, request.user, "task.submit")
         return True
 
     def has_object_permission(self, request, view, obj: Submission):
@@ -59,7 +59,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
     @action(methods=["get"], detail=True)
     def download(self, request, pk=None):
         submission = self.get_object()
-        if not can(submission.task.course, request.user, "submission.download"):
+        if not has_perm(submission.task.course, request.user, "submission.download"):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         file_handle = submission.file.open()
         response = FileResponse(file_handle, content_type="application/octet-stream")
