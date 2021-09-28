@@ -175,6 +175,11 @@ ROLES_SUBMISSION_RERUN = ['LEC', 'ADM', 'TA']
 
 ROLES_JOB_VIEW = ['LEC', 'ADM', 'TA']
 
+ROLES_INVITATION_VIEW = ['LEC', 'ADM', 'TA']
+ROLES_INVITATION_ADD = ['LEC', 'ADM']
+ROLES_INVITATION_EDIT = ['LEC', 'ADM']
+ROLES_INVITATION_DELETE = ['LEC', 'ADM']
+
 ROLES = {
     'course.view': ROLES_COURSE_VIEW,
     'course.edit': ROLES_COURSE_EDIT,
@@ -191,6 +196,10 @@ ROLES = {
     'submission.view': ROLES_SUBMISSION_VIEW,
     'submission.rerun': ROLES_SUBMISSION_RERUN,
     'job.view': ROLES_JOB_VIEW,
+    'invitation.view': ROLES_INVITATION_VIEW,
+    'invitation.add': ROLES_INVITATION_ADD,
+    'invitation.edit': ROLES_INVITATION_EDIT,
+    'invitation.delete': ROLES_INVITATION_DELETE,
 }
 
 # Upload
