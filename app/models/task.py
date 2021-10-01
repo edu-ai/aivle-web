@@ -29,6 +29,7 @@ class Task(models.Model):
 
     # parent = models.ForeignKey('self', on_delete=models.CASCADE, related_name='subtasks', null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='tasks')
+    eval_queue = models.CharField(max_length=255, default="default")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

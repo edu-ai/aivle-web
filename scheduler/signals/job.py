@@ -12,7 +12,7 @@ def submit_job(sender, instance: Submission, created, **kwargs):
         return  # prevent dead lock
     job = Job.objects.create(submission=instance)
     job.save()
-    result = evaluate.delay(job_id=job.pk)
+    result = evaluate.apply_async(args=[job.pk], queue=instance.task.eval_queue)
     job.task_id = result.id
     job.status = Job.STATUS_QUEUED
     job.save()

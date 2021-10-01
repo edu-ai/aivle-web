@@ -1,7 +1,6 @@
 from django.db import models
 
 from app.models import Submission
-from scheduler.models import Worker
 
 
 class Job(models.Model):
@@ -24,6 +23,9 @@ class Job(models.Model):
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name="jobs")
     status = models.CharField(max_length=2, choices=STATUSES, default=STATUS_QUEUED)
     task_id = models.CharField(max_length=64, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         if self.worker_name:

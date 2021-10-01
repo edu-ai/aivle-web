@@ -2,8 +2,10 @@ import logging
 import pickle
 from ast import literal_eval
 
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -33,6 +35,9 @@ class JobViewSet(ReadOnlyModelViewSet):
     serializer_class = JobSerializer
     queryset = Job.objects.all()
     permission_classes = [JobPermissions]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ["submission"]
+    ordering_fields = ["created_at", "updated_at"]
 
     def get_serializer_class(self, *args, **kwargs):
         """Instantiate the list of serializers per action from class attribute (must be defined)."""
