@@ -172,6 +172,7 @@ ROLES_TASK_SUBMIT = ['STU', 'TA', 'LEC', 'ADM']
 ROLES_SUBMISSION_DOWNLOAD = ['LEC', 'ADM', 'TA']
 ROLES_SUBMISSION_VIEW = ['LEC', 'ADM', 'TA']
 ROLES_SUBMISSION_RERUN = ['LEC', 'ADM', 'TA']
+ROLES_SUBMISSION_MARK_FOR_GRADING = ['LEC', 'ADM', 'TA']
 
 ROLES_JOB_VIEW = ['LEC', 'ADM', 'TA']
 
@@ -195,6 +196,7 @@ ROLES = {
     'submission.download': ROLES_SUBMISSION_DOWNLOAD,
     'submission.view': ROLES_SUBMISSION_VIEW,
     'submission.rerun': ROLES_SUBMISSION_RERUN,
+    'submission.mark': ROLES_SUBMISSION_MARK_FOR_GRADING,
     'job.view': ROLES_JOB_VIEW,
     'invitation.view': ROLES_INVITATION_VIEW,
     'invitation.add': ROLES_INVITATION_ADD,

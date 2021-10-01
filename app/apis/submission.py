@@ -65,4 +65,19 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         response = FileResponse(file_handle, content_type="application/octet-stream")
         response['Content-Length'] = submission.file.size
         response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(submission.file.name)
-        return response
+        return
+
+    @action(methods=["get"], detail=True)
+    def mark_for_grading(self, request, pk):
+        submission = self.get_object()
+        if has_perm(submission.task.course, request.user, "submission.mark") \
+                or request.user == submission.user:
+            submissions = Submission.objects.filter(user=submission.user, task=submission.task)
+            for other_submission in submissions:
+                other_submission.marked_for_grading = False
+            Submission.objects.bulk_update(submissions, ["marked_for_grading"])
+            submission.marked_for_grading = True
+            submission.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)

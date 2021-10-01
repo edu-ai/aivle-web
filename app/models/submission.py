@@ -24,6 +24,7 @@ class Submission(models.Model):
     notes = models.TextField(blank=True, null=True)
 
     created_at = models.DateTimeField(default=timezone.now)
+    marked_for_grading = models.BooleanField(default=False)
 
     @property
     def filename(self):

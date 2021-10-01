@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from app.models import Course, Invitation, Participation
-from app.models.invitation import is_valid_invitation
 from app.serializers import CourseSerializer, CourseListSerializer
 from app.utils.permission import has_perm
 
@@ -58,7 +57,7 @@ class CourseViewSet(ModelViewSet):
         token = request.query_params["token"]
         try:
             invitation = Invitation.objects.get(token=token)
-            if not is_valid_invitation(invitation):
+            if not invitation.is_valid:
                 return Response(data={"reason": "invitation expired or invalidated"},
                                 status=status.HTTP_400_BAD_REQUEST)
             if Participation.objects.filter(user=request.user, course=invitation.course).exists():

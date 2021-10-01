@@ -14,6 +14,6 @@ class Invitation(models.Model):
     valid_to = models.DateTimeField(null=False)
     valid = models.BooleanField(default=False)
 
-
-def is_valid_invitation(invitation: Invitation):
-    return invitation.valid and invitation.valid_from <= timezone.now() <= invitation.valid_to
+    @property
+    def is_valid(self):
+        return self.valid and self.valid_from <= timezone.now() <= self.valid_to

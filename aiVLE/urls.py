@@ -45,7 +45,7 @@ urlpatterns = [
     re_path(
         r'^dj-rest-auth/registration/account-confirm-email/(?P<key>[-:\w]+)/$', views.handle_verify_email,
         name='account_confirm_email',
-    ),
+    ), 
     re_path(
         r'^dj-rest-auth/accounts/reset/(?P<uid>[-:\w]+)/(?P<token>[-:\w]+)/$', views.handle_reset_password,
         name='password_reset_confirm',
