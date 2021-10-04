@@ -65,7 +65,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         response = FileResponse(file_handle, content_type="application/octet-stream")
         response['Content-Length'] = submission.file.size
         response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(submission.file.name)
-        return
+        return response
 
     @action(methods=["get"], detail=True)
     def mark_for_grading(self, request, pk):
