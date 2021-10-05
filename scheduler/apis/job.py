@@ -2,6 +2,7 @@ import logging
 import pickle
 from ast import literal_eval
 
+from django.db.models import Max
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
@@ -10,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from app.models import Submission
 from app.utils.permission import has_perm
 from scheduler.models import Job
 from scheduler.serializers import JobSerializer, JobListSerializer
@@ -83,7 +85,7 @@ class JobViewSet(ReadOnlyModelViewSet):
                 "status": "failed",
                 "reason": "`task_id` and `result` must be present"
             })
-        task_id = request.data["task_id"]
+        task_id = request.data["task_id"]  # IMPT: task_id refers to Task Queue ID, not aiVLE task ID
         result = request.data["result"]
         if job.task_id != task_id:
             return Response(status=status.HTTP_401_UNAUTHORIZED, data={
@@ -95,10 +97,19 @@ class JobViewSet(ReadOnlyModelViewSet):
         try:  # TODO: no hack, support for >1 test cases
             obj = pickle.loads(literal_eval(result))
             score = obj["results"][0]["result"]["value"]
+            other_submissions = Submission.objects.filter(task=job.submission.task, user=request.user)
+            prev_highest_score = other_submissions.aggregate(Max("point"))["point__max"]
             submission = job.submission
             submission.point = score
             submission.notes = str(obj)
+            # By default, mark latest highest scoring submission for grading
+            if prev_highest_score is None or prev_highest_score <= score:
+                for other_submission in other_submissions:
+                    other_submission.marked_for_grading = False
+                Submission.objects.bulk_update(other_submissions, ["marked_for_grading"])
+                submission.marked_for_grading = True
             submission.save()
+            Submission.objects.aggregate(Max("point"))
         except Exception as e:
             logger.warning(e)
             pass
