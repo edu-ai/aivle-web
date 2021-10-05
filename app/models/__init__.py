@@ -5,3 +5,4 @@ from app.models.similarity import *
 from app.models.submission import *
 from app.models.task import *
 from app.models.invitation import *
+from app.models.course_whitelist import *

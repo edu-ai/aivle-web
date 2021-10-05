@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from app.models import Course, Invitation, Participation
-from app.serializers import CourseSerializer, CourseListSerializer
+from app.models.course_whitelist import CourseWhitelist
+from app.serializers import CourseSerializer, CourseListSerializer, CourseWhitelistSerializer
 from app.utils.permission import has_perm
 
 
@@ -63,9 +64,44 @@ class CourseViewSet(ModelViewSet):
             if Participation.objects.filter(user=request.user, course=invitation.course).exists():
                 return Response(data={"reason": "already joined this course"},
                                 status=status.HTTP_400_BAD_REQUEST)
+            if invitation.course.use_whitelist and \
+                    not CourseWhitelist.objects.filter(course=invitation.course, email=request.user.email).exists():
+                return Response(data={"reason": "the course has an email whitelist and you are not on the list"},
+                                status=status.HTTP_400_BAD_REQUEST)
             p = Participation(user=request.user, course=invitation.course, role=invitation.role)
             p.save()
             return Response(CourseSerializer(invitation.course).data, status=status.HTTP_201_CREATED)
         except Exception as e:
             print(e)
             return Response(data={"reason": "invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=["get"], detail=True)
+    def enable_whitelist(self, request, pk):
+        course = self.get_object()
+        if not has_perm(course, request.user, "course.edit_whitelist"):
+            return Response(data={"reason": "you do not have edit whitelist access to this course"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+        if course.use_whitelist:
+            return Response(data={"reason": "course already enabled whitelist"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        course.use_whitelist = True
+        course.save()
+        whitelist = []
+        for user in course.participants.all():
+            if user.email:
+                w = CourseWhitelist(course=course, email=user.email)
+                whitelist.append(w)
+                w.save()
+        return Response(data=CourseWhitelistSerializer(whitelist, many=True).data, status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=True)
+    def disable_whitelist(self, request, pk):
+        course = self.get_object()
+        if not has_perm(course, request.user, "course.edit_whitelist"):
+            return Response(data={"reason": "you do not have edit whitelist access to this course"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+        if not course.use_whitelist:
+            return Response(data={"reason": "course did not enable whitelist"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        course.use_whitelist = False
+        course.save()

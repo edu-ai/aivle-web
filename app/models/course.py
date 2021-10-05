@@ -18,6 +18,7 @@ class Course(models.Model):
         through='Participation',
         through_fields=('course', 'user'),
     )
+    use_whitelist = models.BooleanField(default=False)
 
     def __str__(self):
         return "{} - {} Semester {}".format(self.code, self.academic_year, self.semester)

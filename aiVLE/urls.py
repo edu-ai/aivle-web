@@ -21,7 +21,7 @@ from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 
 from app import views
-from app.apis import TaskViewSet, SubmissionViewSet, CourseViewSet, InvitationViewSet
+from app.apis import TaskViewSet, SubmissionViewSet, CourseViewSet, InvitationViewSet, CourseWhitelistViewset
 from scheduler.apis import JobViewSet
 
 router = DefaultRouter()
@@ -30,6 +30,7 @@ router.register(r'tasks', TaskViewSet, basename="tasks")
 router.register(r'submissions', SubmissionViewSet, basename="submissions")
 router.register(r'courses', CourseViewSet, basename="courses")
 router.register(r'invitations', InvitationViewSet, basename="invitations")
+router.register(r'whitelist', CourseWhitelistViewset, basename="whitelist")
 
 urlpatterns = [
     path('', lambda req: redirect('api/v1/')),
