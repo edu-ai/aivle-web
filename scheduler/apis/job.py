@@ -97,7 +97,7 @@ class JobViewSet(ReadOnlyModelViewSet):
         try:  # TODO: no hack, support for >1 test cases
             obj = pickle.loads(literal_eval(result))
             score = obj["results"][0]["result"]["value"]
-            other_submissions = Submission.objects.filter(task=job.submission.task, user=request.user)
+            other_submissions = Submission.objects.filter(task=job.submission.task, user=job.submission.user)
             prev_highest_score = other_submissions.aggregate(Max("point"))["point__max"]
             submission = job.submission
             submission.point = score
