@@ -16,7 +16,7 @@ from app.utils.permission import has_perm
 from scheduler.models import Job
 from scheduler.serializers import JobSerializer, JobListSerializer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 
 class JobPermissions(IsAuthenticated):
@@ -66,6 +66,7 @@ class JobViewSet(ReadOnlyModelViewSet):
         job.status = Job.STATUS_RUNNING
         job.worker_name = worker_name
         job.save()
+        logger.info(f"task started: {task_id} on {worker_name}")
         return Response({
             "status": "success",
             "task": job.submission.task.pk,
@@ -114,6 +115,7 @@ class JobViewSet(ReadOnlyModelViewSet):
             logger.warning(e)
             pass
         job.save()
+        logger.info(f"task finished: {task_id} by {job.worker_name}")
         return Response({
             "status": "success"
         })
