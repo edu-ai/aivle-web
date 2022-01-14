@@ -1,17 +1,26 @@
+import datetime
 import os
 
 from django.contrib.auth.models import User
 from django.http import FileResponse
+from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, filters
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
 from aiVLE.settings import ROLES_SUBMISSION_VIEW
 from app.models import Submission, Task, Participation
 from app.serializers import SubmissionSerializer
 from app.utils.permission import has_perm
+
+
+class SubmissionLimitExceeded(APIException):
+    status_code = status.HTTP_403_FORBIDDEN
+    default_detail = _('You have exceeded your daily submission limit.')
+    default_code = 'submission_limit_exceeded'
 
 
 class SubmissionPermissions(permissions.IsAuthenticated):
@@ -46,6 +55,17 @@ class SubmissionViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ["user", "task"]
     ordering_fields = ["created_at"]
+
+    def create(self, request, *args, **kwargs):
+        current_datetime = datetime.datetime.now()
+        daily_submission_count = Submission.objects.filter(user_id=request.data["user"],
+                                                           created_at__year=current_datetime.year,
+                                                           created_at__month=current_datetime.month,
+                                                           created_at__day=current_datetime.day).count()
+        task = Task.objects.get(pk=request.data["task"])
+        if daily_submission_count >= task.daily_submission_limit:
+            raise SubmissionLimitExceeded()
+        return super(SubmissionViewSet, self).create(request, *args, **kwargs)
 
     def get_queryset(self):
         if self.request.user.is_superuser:

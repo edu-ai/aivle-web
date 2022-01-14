@@ -279,6 +279,9 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
 # Celery configuration
+CELERY_ENABLE = True
+if os.getenv("DISABLE_CELERY") is not None:
+    CELERY_ENABLE = False
 CELERY_BROKER_URL = os.getenv("BROKER_URI")
 CELERY_RESULT_BACKEND = "rpc"
 CELERY_ACCEPT_CONTENT = ['application/json']
