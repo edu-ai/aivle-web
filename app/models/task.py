@@ -18,7 +18,7 @@ class Task(models.Model):
     template = models.FileField(upload_to=task_template_path, blank=True, null=True)
 
     daily_submission_limit = models.PositiveSmallIntegerField(default=DEFAULT_DAILY_SUBMISSIONS_LIMIT)
-    max_upload_size = models.IntegerField(default=DEFAULT_MAX_UPLOAD_SIZE)
+    max_upload_size = models.IntegerField(default=DEFAULT_MAX_UPLOAD_SIZE)  # in KiB
     run_time_limit = models.IntegerField(default=DEFAULT_RUN_TIME_LIMIT)
 
     opened_at = models.DateTimeField(blank=True, null=True)

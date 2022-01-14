@@ -17,9 +17,9 @@ class CourseField(PrimaryKeyRelatedField):
 class TaskSerializer(ModelSerializer):
     grader = FileField(use_url=False)
     template = FileField(use_url=False, required=False)
-    daily_submission_limit = IntegerField(default=3)
-    max_upload_size = IntegerField(default=32)
-    run_time_limit = IntegerField(default=600)
+    daily_submission_limit = IntegerField(default=Task.DEFAULT_DAILY_SUBMISSIONS_LIMIT)
+    max_upload_size = IntegerField(default=Task.DEFAULT_MAX_UPLOAD_SIZE)
+    run_time_limit = IntegerField(default=Task.DEFAULT_RUN_TIME_LIMIT)
     course = CourseField()
 
     class Meta:
