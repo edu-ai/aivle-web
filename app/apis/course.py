@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
@@ -8,6 +10,8 @@ from app.models import Course, Invitation, Participation
 from app.models.course_whitelist import CourseWhitelist
 from app.serializers import CourseSerializer, CourseListSerializer, CourseWhitelistSerializer
 from app.utils.permission import has_perm
+
+logger = logging.getLogger("django")
 
 
 class CoursePermissions(IsAuthenticated):
@@ -105,3 +109,22 @@ class CourseViewSet(ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
         course.use_whitelist = False
         course.save()
+
+    @action(detail=True, methods=["post"])
+    def batch_add_whitelist(self, request, pk):
+        course = self.get_object()
+        if not has_perm(course, request.user, "course.edit_whitelist"):
+            return Response(data={"reason": "you do not have edit whitelist access to this course"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+        email_list = request.data.get("email_list")
+        logger.debug(email_list)
+        success_list = []
+        for email in email_list:
+            try:
+                cwl = CourseWhitelist(course=course, email=email)
+                cwl.save()
+                success_list.append(cwl)
+            except Exception as e:
+                logger.warning(e)
+        return Response(data=CourseWhitelistSerializer(success_list, many=True, read_only=True).data,
+                        status=status.HTTP_200_OK)
