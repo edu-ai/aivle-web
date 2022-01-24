@@ -10,12 +10,12 @@
 
 ## Setup
 
-Install the requirements
+1. Install the requirements
 ```
 pip install -r requirements.txt
 ```
 
-Create your secret key and store it in ``.env`` as 
+2. Create your [secret key](https://djecrety.ir/) and store it in ``.env`` as 
 ```dotenv
 SECRET_KEY=<redacted>
 BROKER_URI=<redacted>
@@ -25,14 +25,16 @@ EMAIL_HOST_PASSWORD=<redacted>
 DEFAULT_FROM_EMAIL=<redacted>
 ```
 
-Migrate and create the superuser
+3. Create the `/logs` directory in the same level as `manage.py`/`/app`
+
+4. Migrate and create the superuser
 ```
 python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
-Run server
+5. Run server
 ```
 python manage.py runserver
 ```
