@@ -1,9 +1,11 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 
 from app.models import Course
 from app.utils.file_hash import task_grader_path, task_template_path
+from scheduler.models.queue import Queue
 
 
 class Task(models.Model):
@@ -29,10 +31,19 @@ class Task(models.Model):
 
     # parent = models.ForeignKey('self', on_delete=models.CASCADE, related_name='subtasks', null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='tasks')
-    eval_queue = models.CharField(max_length=255, default="default")
-
+    eval_queue = models.ForeignKey(Queue, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        """
+        This looks like a hack.
+        Ref: https://stackoverflow.com/questions/52947136/how-to-call-my-field-validators-in-my-save-method-in-django
+        """
+        if self.eval_queue is not None and not self.eval_queue.public:
+            if self.eval_queue.course != self.course:
+                raise ValidationError("Evaluation queue needs to be either public or belongs to this task's course.")
+        super(Task, self).save(args, kwargs)
 
     @property
     def deadline(self):

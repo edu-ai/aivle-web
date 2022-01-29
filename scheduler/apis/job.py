@@ -13,7 +13,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from app.models import Submission
 from app.utils.permission import has_perm
-from scheduler.models import Job
+from scheduler.models.job import Job
 from scheduler.serializers import JobSerializer, JobListSerializer
 
 logger = logging.getLogger('django')

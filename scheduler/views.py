@@ -1,9 +1,11 @@
+"""
+Deprecated implementation of WebSocket-based scheduler
+"""
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.http import JsonResponse
 
-# Create your views here.
-from scheduler.models import Worker
+from scheduler.models.worker import Worker
 
 
 def send_to_channel(request):

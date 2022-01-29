@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from scheduler.models import Job
+from scheduler.models.job import Job
 
 
 class JobSerializer(ModelSerializer):

@@ -4,10 +4,14 @@ from datetime import datetime
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from scheduler.models import Worker
+from scheduler.models.worker import Worker
 
 
 class WorkerConsumer(AsyncWebsocketConsumer):
+    """
+    Deprecated implementation of WebSocket-based scheduler
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
