@@ -24,5 +24,5 @@ class CourseWhitelistViewset(ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_superuser:
             return CourseWhitelist.objects.all()
-        return CourseWhitelist.objects.filter(course__participants__username__contains=self.request.user.username,
+        return CourseWhitelist.objects.filter(course__participants__username__exact=self.request.user.username,
                                               course__participation__role__in=ROLES_COURSE_VIEW_WHITELIST)

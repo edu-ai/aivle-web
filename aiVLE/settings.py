@@ -200,6 +200,8 @@ ROLES_COURSE_VIEW = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
 ROLES_COURSE_JOIN = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
 ROLES_COURSE_EDIT_WHITELIST = ['LEC', 'ADM']
 ROLES_COURSE_VIEW_WHITELIST = ['LEC', 'ADM', 'TA']
+ROLES_COURSE_EDIT_QUEUE = ['LEC', 'ADM']
+ROLES_COURSE_VIEW_QUEUE = ['LEC', 'ADM']
 
 ROLES_TASK_VIEW = ['GUE', 'STU', 'TA', 'LEC', 'ADM']
 ROLES_TASK_VIEW_ALL = ['TA', 'LEC', 'ADM']  # view unpublished tasks
@@ -229,6 +231,8 @@ ROLES = {
     'course.join': ROLES_COURSE_JOIN,
     'course.edit_whitelist': ROLES_COURSE_EDIT_WHITELIST,
     'course.view_whitelist': ROLES_COURSE_VIEW_WHITELIST,
+    'course.view_queue': ROLES_COURSE_VIEW_QUEUE,
+    'course.edit_queue': ROLES_COURSE_EDIT_QUEUE,
     'task.view': ROLES_TASK_VIEW,
     'task.add': ROLES_TASK_ADD,
     'task.edit': ROLES_TASK_EDIT,

@@ -22,7 +22,7 @@ from rest_framework.routers import DefaultRouter
 
 from app import views
 from app.apis import TaskViewSet, SubmissionViewSet, CourseViewSet, InvitationViewSet, CourseWhitelistViewset
-from scheduler.apis import JobViewSet
+from scheduler.apis import JobViewSet, QueueViewSet
 
 router = DefaultRouter()
 router.register(r'jobs', JobViewSet, basename="jobs")
@@ -31,6 +31,7 @@ router.register(r'submissions', SubmissionViewSet, basename="submissions")
 router.register(r'courses', CourseViewSet, basename="courses")
 router.register(r'invitations', InvitationViewSet, basename="invitations")
 router.register(r'whitelist', CourseWhitelistViewset, basename="whitelist")
+router.register(r'queue', QueueViewSet, basename="queue")
 
 urlpatterns = [
     path('', lambda req: redirect('api/v1/')),
