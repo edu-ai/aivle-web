@@ -109,6 +109,7 @@ class CourseViewSet(ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
         course.use_whitelist = False
         course.save()
+        return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
     def batch_add_whitelist(self, request, pk):

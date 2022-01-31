@@ -5,7 +5,7 @@ from django.dispatch import receiver
 
 from aiVLE.settings import CELERY_ENABLE
 from app.models import Submission
-from scheduler.celery import evaluate
+from scheduler.celery_app import evaluate
 from scheduler.models.job import Job
 
 logger = logging.getLogger('django')
