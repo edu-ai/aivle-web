@@ -46,7 +46,7 @@ class QueueViewSet(ModelViewSet):
         queue = self.get_object()
         worker = request.query_params["worker"]
         logger.info(f"stop consuming from {queue} in {worker}")
-        app.control.cancel_consumer(queue.name, [worker])
+        logger.info(app.control.cancel_consumer(queue.name, destination=[worker], reply=True))
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["get"])
@@ -57,5 +57,5 @@ class QueueViewSet(ModelViewSet):
         queue = self.get_object()
         worker = request.query_params["worker"]
         logger.info(f"resume consuming from {queue} in {worker}")
-        app.control.add_consumer(queue.name, [worker])
+        logger.info(app.control.add_consumer(queue.name, destination=[worker], reply=True))
         return Response(status=status.HTTP_200_OK)

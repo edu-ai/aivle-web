@@ -27,8 +27,16 @@ class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @staticmethod
+    def _get_status_description(status_char: str):
+        for item in Job.STATUSES:
+            if item[0] == status_char:
+                return item[1]
+        return "Unknown"
+
     def __str__(self):
+        status_desc = self._get_status_description(self.status)
         if self.worker_name:
-            return f"Job - {self.worker_name} - {self.status} - {self.submission_id}"
+            return f"Job - {self.worker_name} - {status_desc} - {self.submission_id}"
         else:
-            return f"Job - NO_WORKER - {self.status} - {self.submission_id}"
+            return f"Job - NO_WORKER - {status_desc} - {self.submission_id}"

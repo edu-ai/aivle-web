@@ -12,16 +12,20 @@ logger = logging.getLogger('django')
 
 
 @receiver(post_save, sender=Submission)
-def submit_job(sender, instance: Submission, created, **kwargs):
+def create_job_upon_submission(sender, instance: Submission, created, **kwargs):
     if not created:
         return  # prevent dead lock
-    job = Job.objects.create(submission=instance)
+    create_job_with_submission(instance)
+
+
+def create_job_with_submission(submission: Submission):
+    job = Job.objects.create(submission=submission)
     job.save()
     if CELERY_ENABLE:
-        result = evaluate.apply_async(args=[job.pk], queue=instance.task.eval_queue)
+        result = evaluate.apply_async(args=[job.pk], queue=submission.task.eval_queue.name)
         job.task_id = result.id
     else:
         job.task_id = "dummy_task_id"
     job.status = Job.STATUS_QUEUED
     job.save()
-    logger.info(f"task {job.task_id} is submitted")
+    logger.info(f"{job} created for {submission}")

@@ -15,6 +15,7 @@ from aiVLE.settings import ROLES_SUBMISSION_VIEW
 from app.models import Submission, Task, Participation
 from app.serializers import SubmissionSerializer
 from app.utils.permission import has_perm
+from scheduler.signals import create_job_with_submission
 
 
 class SubmissionLimitExceeded(APIException):
@@ -98,6 +99,15 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             Submission.objects.bulk_update(submissions, ["marked_for_grading"])
             submission.marked_for_grading = True
             submission.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    @action(methods=["get"], detail=True)
+    def rerun(self, request, pk):
+        submission = self.get_object()
+        if has_perm(submission.task.course, request.user, "submission.rerun"):
+            create_job_with_submission(submission)
             return Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
