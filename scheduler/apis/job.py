@@ -87,33 +87,41 @@ class JobViewSet(ReadOnlyModelViewSet):
                 "reason": "`task_id` and `result` must be present"
             })
         task_id = request.data["task_id"]  # IMPT: task_id refers to Task Queue ID, not aiVLE task ID
+        success = request.data["ok"]
+        worker_log = request.data["raw_log"]
         result = request.data["result"]
+        error = request.data["error"]  # TODO: use this
         if job.task_id != task_id:
             return Response(status=status.HTTP_401_UNAUTHORIZED, data={
                 "status": "failed",
                 "reason": "incorrect task_id"
             })
-        job.status = Job.STATUS_DONE
-        job.worker_log = result
-        try:  # TODO: no hack, support for >1 test cases
-            obj = pickle.loads(literal_eval(result))
-            score = obj["results"][0]["result"]["value"]
-            other_submissions = Submission.objects.filter(task=job.submission.task, user=job.submission.user)
-            prev_highest_score = other_submissions.aggregate(Max("point"))["point__max"]
-            submission = job.submission
-            submission.point = score
-            submission.notes = str(obj)
-            # By default, mark latest highest scoring submission for grading
-            if prev_highest_score is None or prev_highest_score <= score:
-                for other_submission in other_submissions:
-                    other_submission.marked_for_grading = False
-                Submission.objects.bulk_update(other_submissions, ["marked_for_grading"])
-                submission.marked_for_grading = True
-            submission.save()
-            Submission.objects.aggregate(Max("point"))
-        except Exception as e:
-            logger.warning(e)
-            pass
+        if not success:
+            job.status = Job.STATUS_ERROR
+            print("not success")
+        else:
+            try:  # TODO: no hack, support for >1 test cases
+                obj = pickle.loads(literal_eval(result))
+                score = obj["results"][0]["result"]["value"]
+                other_submissions = Submission.objects.filter(task=job.submission.task, user=job.submission.user)
+                prev_highest_score = other_submissions.aggregate(Max("point"))["point__max"]
+                submission = job.submission
+                submission.point = score
+                submission.notes = str(obj)
+                # By default, mark latest highest scoring submission for grading
+                if prev_highest_score is None or prev_highest_score <= score:
+                    for other_submission in other_submissions:
+                        other_submission.marked_for_grading = False
+                    Submission.objects.bulk_update(other_submissions, ["marked_for_grading"])
+                    submission.marked_for_grading = True
+                submission.save()
+                Submission.objects.aggregate(Max("point"))
+                job.status = Job.STATUS_DONE
+            except Exception as e:
+                job.status = Job.STATUS_ERROR
+                logger.warning(e)
+                pass
+        job.worker_log = worker_log
         job.save()
         logger.info(f"task finished: {task_id} by {job.worker_name}")
         return Response({

@@ -29,6 +29,7 @@ DEFAULT_FROM_EMAIL=<redacted>
 
 4. Migrate and create the superuser
 ```
+python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 ```
@@ -42,4 +43,4 @@ python manage.py runserver
 (In `localhost:8000/admin`, after logging in, click on "Email addresses", add an email address for your
 superuser, and check both checkboxes below.)
 
-7. In Django admin panel, create a new queue with name "default" and `public=True` and **without** a course.
+7. In Django admin panel, create a new queue with name "default" and `public=True` **without** a course.

@@ -9,9 +9,10 @@ from scheduler.models.queue import Queue
 
 
 class Task(models.Model):
-    DEFAULT_MAX_UPLOAD_SIZE = 5 * 1024  # KB
+    DEFAULT_MAX_UPLOAD_SIZE = 5 * 1024  # KiB
     DEFAULT_DAILY_SUBMISSIONS_LIMIT = 3
     DEFAULT_RUN_TIME_LIMIT = 60  # Second
+    DEFAULT_RAM_LIMIT = 256  # MiB
 
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -22,6 +23,7 @@ class Task(models.Model):
     daily_submission_limit = models.PositiveSmallIntegerField(default=DEFAULT_DAILY_SUBMISSIONS_LIMIT)
     max_upload_size = models.IntegerField(default=DEFAULT_MAX_UPLOAD_SIZE)  # in KiB
     run_time_limit = models.IntegerField(default=DEFAULT_RUN_TIME_LIMIT)
+    ram_limit = models.IntegerField(default=DEFAULT_RAM_LIMIT)  # in MiB
 
     opened_at = models.DateTimeField(blank=True, null=True)
     deadline_at = models.DateTimeField(blank=True, null=True)
@@ -43,7 +45,7 @@ class Task(models.Model):
         if self.eval_queue is not None and not self.eval_queue.public:
             if self.eval_queue.course != self.course:
                 raise ValidationError("Evaluation queue needs to be either public or belongs to this task's course.")
-        super(Task, self).save(args, kwargs)
+        super(Task, self).save(*args, **kwargs)
 
     @property
     def deadline(self):
