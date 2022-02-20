@@ -54,8 +54,9 @@ class SubmissionViewSet(viewsets.ModelViewSet):
     serializer_class = SubmissionSerializer
     permission_classes = [SubmissionPermissions]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ["user", "task"]
+    filterset_fields = ["user", "task", "marked_for_grading"]
     ordering_fields = ["created_at"]
+    pagination_class = None
 
     def create(self, request, *args, **kwargs):
         current_datetime = datetime.datetime.now()

@@ -53,6 +53,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     filterset_fields = ["course"]
     ordering_fields = ["opened_at", "closed_at", "deadline_at"]
     search_fields = ["name", "description"]
+    pagination_class = None
 
     def get_queryset(self):
         if self.request.user.is_superuser:
