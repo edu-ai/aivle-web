@@ -10,3 +10,4 @@ class InvitationSerializer(ModelSerializer):
     class Meta:
         model = Invitation
         fields = "__all__"
+        read_only_fields = ("valid", )
