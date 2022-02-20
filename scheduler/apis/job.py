@@ -38,7 +38,7 @@ class JobViewSet(ReadOnlyModelViewSet):
     queryset = Job.objects.all()
     permission_classes = [JobPermissions]
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ["submission"]
+    filterset_fields = ["submission", "submission__task"]
     ordering_fields = ["created_at", "updated_at"]
 
     def get_serializer_class(self, *args, **kwargs):
