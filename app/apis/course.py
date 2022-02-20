@@ -8,7 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from app.models import Course, Invitation, Participation
 from app.models.course_whitelist import CourseWhitelist
-from app.serializers import CourseSerializer, CourseListSerializer, CourseWhitelistSerializer
+from app.serializers import CourseSerializer, CourseListSerializer, CourseWhitelistSerializer, UserSerializer
 from app.utils.permission import has_perm
 
 logger = logging.getLogger("django")
@@ -128,4 +128,16 @@ class CourseViewSet(ModelViewSet):
             except Exception as e:
                 logger.warning(e)
         return Response(data=CourseWhitelistSerializer(success_list, many=True, read_only=True).data,
+                        status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get"])
+    def get_participants(self, request, pk):
+        course = self.get_object()
+        resp = []
+        for participation in Participation.objects.filter(course=course).all():
+            resp.append({
+                "user": UserSerializer(participation.user).data,
+                "role": participation.role
+            })
+        return Response(data=resp,
                         status=status.HTTP_200_OK)

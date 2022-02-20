@@ -6,4 +6,4 @@ from app.models import Participation
 class ParticipationSerializer(ModelSerializer):
     class Meta:
         model = Participation
-        fields = ("role", )
+        fields = "__all__"
