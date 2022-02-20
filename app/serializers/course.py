@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
-from app.models import Course
+from app.models import Course, Participation
+from app.serializers.participation import ParticipationSerializer
 
 
 class CourseSerializer(ModelSerializer):
@@ -10,13 +11,16 @@ class CourseSerializer(ModelSerializer):
 
 
 class CourseListSerializer(ModelSerializer):
-    participating = SerializerMethodField()
+    participation = SerializerMethodField()
 
     class Meta:
         model = Course
-        fields = ("id", "code", "academic_year", "semester", "visible", "participating")
+        fields = ("id", "code", "academic_year", "semester", "visible", "participation")
 
-    def get_participating(self, instance):
+    def get_participation(self, instance):
         user = self.context["request"].user
-        course = instance
-        return user in course.participants.all()
+        participation = Participation.objects.filter(user=user, course=instance)
+        if participation.exists():
+            return ParticipationSerializer(participation.get()).data
+        else:
+            return None
