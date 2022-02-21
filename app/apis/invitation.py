@@ -1,10 +1,10 @@
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.viewsets import ModelViewSet
 
-from app.models import Invitation, Course
+from aiVLE.settings import ROLES_INVITATION_VIEW
+from app.models import Invitation, Course, Participation
 from app.serializers import InvitationSerializer
 from app.utils.permission import has_perm
-from aiVLE.settings import ROLES_INVITATION_VIEW
 
 
 class InvitationPermissions(IsAuthenticated):
@@ -30,6 +30,7 @@ class InvitationPermissions(IsAuthenticated):
             return has_perm(obj.course, request.user, "invitation.edit")
         elif request.method == "DELETE":
             return has_perm(obj.course, request.user, "invitation.delete")
+        return False
 
 
 class InvitationViewSet(ModelViewSet):
@@ -37,5 +38,7 @@ class InvitationViewSet(ModelViewSet):
     permission_classes = [InvitationPermissions]
 
     def get_queryset(self):
-        return Invitation.objects.filter(course__participants__username__contains=self.request.user.username,
-                                         course__participation__role__in=ROLES_INVITATION_VIEW)
+        viewable_courses = []
+        for participation in Participation.objects.filter(user=self.request.user, role__in=ROLES_INVITATION_VIEW):
+            viewable_courses.append(participation.course)
+        return Invitation.objects.filter(course__in=viewable_courses)

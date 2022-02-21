@@ -223,6 +223,10 @@ ROLES_INVITATION_ADD = ['LEC', 'ADM']
 ROLES_INVITATION_EDIT = ['LEC', 'ADM']
 ROLES_INVITATION_DELETE = ['LEC', 'ADM']
 
+ROLES_PARTICIPATION_VIEW = ['STU', 'TA', 'LEC', 'ADM']
+ROLES_PARTICIPATION_EDIT = ['LEC', 'ADM']
+ROLES_PARTICIPATION_DELETE = ['LEC', 'ADM']
+
 ROLES = {
     'course.view': ROLES_COURSE_VIEW,
     'course.edit': ROLES_COURSE_EDIT,
@@ -248,6 +252,9 @@ ROLES = {
     'invitation.add': ROLES_INVITATION_ADD,
     'invitation.edit': ROLES_INVITATION_EDIT,
     'invitation.delete': ROLES_INVITATION_DELETE,
+    'participation.view': ROLES_PARTICIPATION_VIEW,
+    'participation.edit': ROLES_PARTICIPATION_EDIT,
+    'participation.delete': ROLES_PARTICIPATION_DELETE,
 }
 
 # Upload

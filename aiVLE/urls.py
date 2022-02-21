@@ -21,7 +21,8 @@ from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 
 from app import views
-from app.apis import TaskViewSet, SubmissionViewSet, CourseViewSet, InvitationViewSet, CourseWhitelistViewset
+from app.apis import TaskViewSet, SubmissionViewSet, CourseViewSet, InvitationViewSet, CourseWhitelistViewset, \
+    ParticipationViewSet
 from scheduler.apis import JobViewSet, QueueViewSet
 
 router = DefaultRouter()
@@ -30,6 +31,7 @@ router.register(r'tasks', TaskViewSet, basename="tasks")
 router.register(r'submissions', SubmissionViewSet, basename="submissions")
 router.register(r'courses', CourseViewSet, basename="courses")
 router.register(r'invitations', InvitationViewSet, basename="invitations")
+router.register(r'participations', ParticipationViewSet, basename="participations")
 router.register(r'whitelist', CourseWhitelistViewset, basename="whitelist")
 router.register(r'queue', QueueViewSet, basename="queue")
 
@@ -47,7 +49,7 @@ urlpatterns = [
     re_path(
         r'^dj-rest-auth/registration/account-confirm-email/(?P<key>[-:\w]+)/$', views.handle_verify_email,
         name='account_confirm_email',
-    ), 
+    ),
     re_path(
         r'^dj-rest-auth/accounts/reset/(?P<uid>[-:\w]+)/(?P<token>[-:\w]+)/$', views.handle_reset_password,
         name='password_reset_confirm',
