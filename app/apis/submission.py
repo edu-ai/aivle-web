@@ -3,6 +3,7 @@ import os
 
 from django.contrib.auth.models import User
 from django.http import FileResponse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, filters
@@ -50,9 +51,29 @@ class SubmissionPermissions(permissions.IsAuthenticated):
         return request.method in permissions.SAFE_METHODS
 
 
+class SubmissionBeforeDeadlinePermissions(permissions.IsAuthenticated):
+    message = "Submitting after deadline is not allowed."
+    code = 403
+
+    def has_permission(self, request, view):
+        if not super(SubmissionBeforeDeadlinePermissions, self).has_permission(request, view):
+            return False
+        if request.user.is_superuser:
+            return True  # do whatever you want, superuser...
+        if request.method in ["POST"]:
+            if "task" not in request.data:
+                return True  # hack
+            task_id = request.data["task"]
+            task = Task.objects.get(pk=task_id)
+            if not task:
+                return False
+            return timezone.now() <= task.deadline_at  # enforce submit deadline
+        return True
+
+
 class SubmissionViewSet(viewsets.ModelViewSet):
     serializer_class = SubmissionSerializer
-    permission_classes = [SubmissionPermissions]
+    permission_classes = [SubmissionPermissions, SubmissionBeforeDeadlinePermissions]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ["user", "task", "marked_for_grading"]
     ordering_fields = ["created_at"]
