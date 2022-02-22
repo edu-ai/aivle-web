@@ -17,12 +17,24 @@ class Job(models.Model):
         (STATUS_DONE, 'Done')
     ]
 
+    ERROR_TIME_LIMIT_EXCEEDED = "TLE"
+    ERROR_MEMORY_LIMIT_EXCEEDED = "MLE"
+    ERROR_VRAM_LIMIT_EXCEEDED = "VLE"
+    ERROR_RUNTIME_ERROR = "RE"
+    ERRORS = [
+        (ERROR_TIME_LIMIT_EXCEEDED, "Time Limit Exceeded"),
+        (ERROR_MEMORY_LIMIT_EXCEEDED, "Memory Limit Exceeded"),
+        (ERROR_VRAM_LIMIT_EXCEEDED, "VRAM Limit Exceeded"),
+        (ERROR_RUNTIME_ERROR, "Runtime Error"),
+    ]
+
     # worker = models.ForeignKey(Worker, null=True, on_delete=models.SET_NULL, related_name="jobs")
     worker_name = models.CharField(max_length=64, null=True)
     worker_log = models.TextField(blank=True, null=True)
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name="jobs")
     status = models.CharField(max_length=2, choices=STATUSES, default=STATUS_QUEUED)
-    task_id = models.CharField(max_length=64, null=True)
+    error = models.CharField(max_length=4, choices=ERRORS, null=True)
+    task_id = models.CharField(max_length=64, null=True)  # Celery task/job ID, NOT aiVLE task ID
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -90,7 +90,7 @@ class JobViewSet(ReadOnlyModelViewSet):
         success = request.data["ok"]
         worker_log = request.data["raw_log"]
         result = request.data["result"]
-        error = request.data["error"]  # TODO: use this
+        error = request.data["error"]
         if job.task_id != task_id:
             return Response(status=status.HTTP_401_UNAUTHORIZED, data={
                 "status": "failed",
@@ -98,7 +98,7 @@ class JobViewSet(ReadOnlyModelViewSet):
             })
         if not success:
             job.status = Job.STATUS_ERROR
-            print("not success")
+            job.error = error
         else:
             try:  # TODO: no hack, support for >1 test cases
                 obj = pickle.loads(literal_eval(result))
