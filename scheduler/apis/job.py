@@ -98,7 +98,11 @@ class JobViewSet(ReadOnlyModelViewSet):
             })
         if not success:
             job.status = Job.STATUS_ERROR
-            job.error = error
+            if job.error is None:
+                job.error = error
+            else:
+                logger.info(f"{job} is submitted with error type {error}, but it already has error type {job.error}, "
+                            f"this update is ignored")
         else:
             try:  # TODO: no hack, support for >1 test cases
                 obj = pickle.loads(literal_eval(result))
@@ -126,4 +130,26 @@ class JobViewSet(ReadOnlyModelViewSet):
         logger.info(f"task finished: {task_id} by {job.worker_name}")
         return Response({
             "status": "success"
+        })
+
+    @action(detail=True)
+    def update_job_error(self, request, pk=None):
+        if "task_id" not in request.data or "error" not in request.data:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={
+                "status": "failed",
+                "reason": "fields `task_id` and `error` must be present"
+            })
+        task_id = request.data["task_id"]
+        error = request.data["error"]
+        job = self.get_object()
+        if job.task_id != task_id:
+            return Response(status=status.HTTP_401_UNAUTHORIZED, data={
+                "status": "failed",
+                "reason": "incorrect task_id"
+            })
+        job.error = error
+        job.save()
+        return Response({
+            "status": "success",
+            "job": job.pk,
         })

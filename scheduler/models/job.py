@@ -49,6 +49,6 @@ class Job(models.Model):
     def __str__(self):
         status_desc = self._get_status_description(self.status)
         if self.worker_name:
-            return f"Job - {self.worker_name} - {status_desc} - {self.submission_id}"
+            return f"Job - {self.worker_name} - {status_desc} - {self.error} - {self.submission_id}"
         else:
-            return f"Job - NO_WORKER - {status_desc} - {self.submission_id}"
+            return f"Job - NO_WORKER - {status_desc} - {self.error} - {self.submission_id}"
