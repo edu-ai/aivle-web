@@ -18,6 +18,9 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import path, include, re_path
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
 from app import views
@@ -35,7 +38,23 @@ router.register(r'participations', ParticipationViewSet, basename="participation
 router.register(r'whitelist', CourseWhitelistViewset, basename="whitelist")
 router.register(r'queue', QueueViewSet, basename="queue")
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title="aiVLE Web API",
+        default_version='v1',
+        # description="Test description",
+        contact=openapi.Contact(email="tan.yuanhong@u.nus.edu"),
+        # license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
 urlpatterns = [
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
     path('', lambda req: redirect('api/v1/')),
 
     url(r'^tasks/(?P<pk>\d+)/download/$', views.task_grader_download, name='task_grader_download'),

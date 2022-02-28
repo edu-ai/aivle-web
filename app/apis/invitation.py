@@ -39,6 +39,6 @@ class InvitationViewSet(ModelViewSet):
 
     def get_queryset(self):
         viewable_courses = []
-        for participation in Participation.objects.filter(user=self.request.user, role__in=ROLES_INVITATION_VIEW):
+        for participation in Participation.objects.filter(user=self.request.user.pk, role__in=ROLES_INVITATION_VIEW):
             viewable_courses.append(participation.course)
         return Invitation.objects.filter(course__in=viewable_courses)

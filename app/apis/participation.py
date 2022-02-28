@@ -34,6 +34,6 @@ class ParticipationViewSet(ModelViewSet):
 
     def get_queryset(self):
         viewable_courses = []
-        for participation in Participation.objects.filter(user=self.request.user, role__in=ROLES_PARTICIPATION_VIEW):
+        for participation in Participation.objects.filter(user=self.request.user.pk, role__in=ROLES_PARTICIPATION_VIEW):
             viewable_courses.append(participation.course)
         return Participation.objects.filter(course__in=viewable_courses)

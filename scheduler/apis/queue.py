@@ -1,6 +1,8 @@
 import logging
 
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
@@ -38,7 +40,11 @@ class QueueViewSet(ModelViewSet):
         return Queue.objects.filter(course__participants__username__exact=self.request.user.username,
                                     course__participation__role__in=ROLES_COURSE_VIEW_QUEUE)
 
+    worker_param = openapi.Parameter('worker', openapi.IN_QUERY, type=openapi.TYPE_STRING, required=True,
+                                     description='Celery worker name')
+
     @action(detail=True, methods=["get"])
+    @swagger_auto_schema(manual_parameters=[worker_param])
     def stop_consuming(self, request, pk):
         if "worker" not in request.query_params:
             return Response(data={"reason": "no worker found in param"},
@@ -49,6 +55,7 @@ class QueueViewSet(ModelViewSet):
         logger.info(app.control.cancel_consumer(queue.name, destination=[worker], reply=True))
         return Response(status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(manual_parameters=[worker_param])
     @action(detail=True, methods=["get"])
     def resume_consuming(self, request, pk):
         if "worker" not in request.query_params:

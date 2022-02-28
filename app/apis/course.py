@@ -1,5 +1,7 @@
 import logging
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
@@ -33,6 +35,7 @@ class CoursePermissions(IsAuthenticated):
             return has_perm(obj, request.user, "course.edit")
         elif request.method == "DELETE":
             return has_perm(obj, request.user, "course.delete")
+        return False
 
 
 class CourseViewSet(ModelViewSet):
@@ -55,8 +58,16 @@ class CourseViewSet(ModelViewSet):
         else:
             return Course.objects.filter(visible=True)
 
+    invitation_token_param = openapi.Parameter('token', openapi.IN_QUERY, type=openapi.TYPE_STRING, required=True,
+                                               description='invitation token')
+
     @action(methods=["get"], detail=False)
+    @swagger_auto_schema(manual_parameters=[invitation_token_param])
     def join_with_invitation(self, request):
+        """
+        Join a course with invitation token.
+        Course information is inferred from a valid token.
+        """
         if "token" not in request.query_params:
             return Response(data={"reason": "no token found in query param"}, status=status.HTTP_400_BAD_REQUEST)
         token = request.query_params["token"]
