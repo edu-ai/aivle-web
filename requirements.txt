@@ -27,6 +27,7 @@ django-fontawesome-5==1.0.18
 django-prettyjson==0.4.1
 django-updateable @ git+https://github.com/rizkiarm/django-updateable.git@343b27bac6403f0e1dac7385cbd9200d56107993
 djangorestframework==3.12.4
+drf-yasg==1.20.0
 hiredis==2.0.0
 hyperlink==21.0.0
 idna==3.2
