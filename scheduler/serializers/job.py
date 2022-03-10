@@ -12,4 +12,4 @@ class JobSerializer(ModelSerializer):
 class JobListSerializer(ModelSerializer):
     class Meta:
         model = Job
-        fields = ("id", "worker_name", "status",)
+        fields = ("id", "worker_name", "status", "error")

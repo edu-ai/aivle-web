@@ -4,7 +4,7 @@ from app.models import Submission
 
 
 class Job(models.Model):
-    STATUS_RECEIVED = 'R'
+    STATUS_RECEIVED = 'C'
     STATUS_QUEUED = 'Q'
     STATUS_RUNNING = 'R'
     STATUS_ERROR = 'E'
