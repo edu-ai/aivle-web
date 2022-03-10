@@ -1,3 +1,5 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.viewsets import ModelViewSet
 
@@ -36,6 +38,9 @@ class InvitationPermissions(IsAuthenticated):
 class InvitationViewSet(ModelViewSet):
     serializer_class = InvitationSerializer
     permission_classes = [InvitationPermissions]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ["course", "valid"]
+    ordering_fields = ["valid_from", "valid_to"]
 
     def get_queryset(self):
         viewable_courses = []

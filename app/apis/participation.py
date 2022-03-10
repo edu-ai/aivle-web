@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.viewsets import ModelViewSet
 
@@ -31,6 +32,8 @@ class ParticipationPermissions(IsAuthenticated):
 class ParticipationViewSet(ModelViewSet):
     serializer_class = ParticipationSerializer
     permission_classes = [ParticipationPermissions]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["course"]
 
     def get_queryset(self):
         viewable_courses = []
