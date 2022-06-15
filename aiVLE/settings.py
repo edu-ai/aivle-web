@@ -86,7 +86,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'prettyjson',
-    'updateable',
     'app',
     'scheduler',
     'channels',
@@ -112,7 +111,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'updateable.middleware.UpdateableMiddleware',
 ]
 
 ROOT_URLCONF = 'aiVLE.urls'
